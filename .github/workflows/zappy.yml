@@ -11,13 +11,14 @@ on:
   push:
     branches-ignore:
       - "ga-ignore-*"
+
   pull_request:
     types: [opened]
     branches-ignore:
       - "ga-ignore-*"
 
 env:
-  EXECUTABLES: zappy
+  EXECUTABLES: zappy_server zappy_gui zappy_ai
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -33,13 +34,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             make \
+            g++ \
+            clang \
+            clang++ \
+            libsfml-dev
 
       - name: Build project
         run: make
         timeout-minutes: 2
-      
+
       - name: Clean project
-        run: make
+        run: make clean
+        timeout-minutes: 2
+
+      - name: Rebuild project
+        run: make re
         timeout-minutes: 2
 
       - name: Check executables
