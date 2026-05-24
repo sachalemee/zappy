@@ -1,0 +1,59 @@
+##
+## EPITECH PROJECT, 2026
+## zappy
+## File description:
+## zappy
+##
+
+name: zappy
+
+on:
+  push:
+    branches-ignore:
+      - "ga-ignore-*"
+  pull_request:
+    types: [opened]
+    branches-ignore:
+      - "ga-ignore-*"
+
+env:
+  EXECUTABLES: zappy
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  check_program_compilation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            make \
+
+      - name: Build project
+        run: make
+        timeout-minutes: 2
+      
+      - name: Clean project
+        run: make
+        timeout-minutes: 2
+
+      - name: Check executables
+        run: |
+          for exec in $EXECUTABLES; do
+            if [ ! -f "$exec" ]; then
+              echo "::error title=Missing executable::$exec not found"
+              exit 1
+            fi
+            if [ ! -x "$exec" ]; then
+              echo "::error title=Not executable::$exec is not executable"
+              exit 1
+            fi
+          done
+
+      - name: Complete project clean
+        run: make fclean

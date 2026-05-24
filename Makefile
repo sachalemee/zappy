@@ -69,4 +69,4 @@ fclean:			clean
 
 re:				fclean all
 
-.PHONY:			all zappy_server zappy_gui zappy_ai clean fclean re
+.PHONY:			all clean fclean re
