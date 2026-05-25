@@ -2,14 +2,15 @@
 ** EPITECH PROJECT, 2026
 ** zappy
 ** File description:
-** main
+** error_handling
 */
 
 #include "zappy.hpp"
 
-int main(int ac, char **av)
+int error_handling(int ac, char **av)
 {
-    (void)ac;
     (void)av;
+    if (ac != 2)
+        return helper();
     return IS_EXIT_SUCCESS;
 }

@@ -9,7 +9,7 @@
 
 int main(int ac, char **av)
 {
-    (void)ac;
-    (void)av;
+    if (error_handling(ac, av) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
     return IS_EXIT_SUCCESS;
 }
