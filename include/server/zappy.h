@@ -5,10 +5,13 @@
 ** zappy
 */
 
-#ifndef ZAPPY_HPP_
-    #define ZAPPY_HPP_
+#ifndef ZAPPY_H_
+    #define ZAPPY_H_
 
     #define IS_EXIT_SUCCESS 0
     #define IS_EXIT_FAILURE 84
 
-#endif /* !ZAPPY_HPP_ */
+int error_handling(int ac, char **av);
+int helper();
+
+#endif /* !ZAPPY_H_ */
