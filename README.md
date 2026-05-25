@@ -8,8 +8,8 @@ By *Marin Jeunot*(marin.jeunot@epitech.eu), *Evans Ramin*(evans.ramin@epitech.eu
 
 ## Objective
 
-- "*desc*"
-[ZAPPY Subject](doc/)
+- "*The goal of this project is to create a network game where several teams confront each other on a tile map containing resources. The winning team is the first one where at least 6 players reach the maximum elevation.*"
+[ZAPPY Subject](subject/G-YEP-400_zappy.pdf)
 
 ## Features
 - exempli gratia
@@ -20,10 +20,9 @@ By *Marin Jeunot*(marin.jeunot@epitech.eu), *Evans Ramin*(evans.ramin@epitech.eu
 
 This project requires:
 - C++20
-- CMake 3.20+
-- clang++ 20.1.8
+- clang 20.1.8
 
-*No external graphics library is required.*
+*SFML ? RAY LIB.*
 
 ### Installation for Linux
 
