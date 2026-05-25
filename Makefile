@@ -33,13 +33,15 @@ CP_R 			= cp -r
 
 AI_NAME			= zappy_ai
 
-AI_PATH			= $(addprefix src/ai/, \
-					$(AI_NAME) \
-				)
+AI_FILE_EXT		= .py
+
+AI_PATH			= $(addprefix src/ai/, $(AI_NAME)$(AI_FILE_EXT))
 
 ## Makefile rules definition
 CC				?= clang
 CXX				?= clang++
+MV				?= mv
+RM				?= rm -f
 
 CFLAGS			+= -Wall -Wextra -Werror
 CXXFLAGS		+= -Wall -Wextra -Werror -std=c++20
@@ -70,6 +72,7 @@ zappy_gui:		$(GUI_OBJ_DIR) $(GUI_OBJ)
 
 zappy_ai:		
 				$(CP_R) $(AI_PATH) .
+				$(MV) $(AI_NAME)$(AI_FILE_EXT) $(AI_NAME)
 
 ## Compilation rules for object files
 obj/server/%.o:	src/server/%.c
