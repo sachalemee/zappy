@@ -6,5 +6,7 @@
 ## helper
 ##
 
+from src.ai.helper import *
+
 def error_handling():
-    pass
+    return helper()
