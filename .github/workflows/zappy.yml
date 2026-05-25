@@ -41,6 +41,12 @@ jobs:
         run: make
         timeout-minutes: 2
 
+      - name: Build zappy server
+        run: make zappy_server
+
+      - name: Build zappy gui
+        run: make zappy_gui
+
       - name: Clean project
         run: make clean
         timeout-minutes: 2
