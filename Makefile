@@ -22,6 +22,9 @@ GUI_SRC			= $(addprefix src/gui/, \
 					main.cpp \
 					error_handling.cpp \
 					helper.cpp \
+					Window.cpp \
+					menu_gui/Menu.cpp \
+					menu_gui/TextBox.cpp \
 				)
 
 GUI_NAME		= zappy_gui
@@ -79,6 +82,12 @@ obj/server/%.o:	src/server/%.c
 				$(CC) $(CFLAGS) $(CPPFLAGS) $(SERVER_CPPFLAGS) -c $< -o $@
 
 obj/gui/%.o:	src/gui/%.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/Menu.o:		src/gui/menu_gui/Menu.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/TextBox.o:	src/gui/menu_gui/TextBox.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 clean:

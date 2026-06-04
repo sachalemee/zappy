@@ -5,25 +5,19 @@
 ** main
 */
 
-//#include "zappy.hpp"
-#include <stdio.h>
-#include <raylib.h>
+#include "zappy.hpp"
+#include "Window.hpp"
+#include "menu_gui/Menu.hpp"
 
 int main()
 {
-    InitWindow(1920, 1080, "ZAPPY GUI");
-    SetTargetFPS(60);
-    Texture2D background = LoadTexture("background.jpg");
+    Window window(1920, 1080, "ZAPPY GUI");
+    Menu menu;
 
-    while (!WindowShouldClose())
-    {
-        BeginDrawing();
-        ClearBackground(BLACK);
-        DrawTexture(background, 0, 0, WHITE);
-        DrawText("Welcome on ZAPPY GUI", 100, 100, 50, LIGHTGRAY);
-        EndDrawing();
+    while (!window.shouldClose()) {
+        window.beginFrame();
+        menu.draw();
+        window.endFrame();
     }
-    UnloadTexture(background);
-    CloseWindow();
-    return 0;
+    return IS_EXIT_SUCCESS;
 }
