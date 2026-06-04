@@ -13,7 +13,16 @@ TextBox::TextBox(float x, float y, float width, float height)
 
 void TextBox::draw()
 {
-    DrawRectangleRec(_rect, LIGHTGRAY);
+    Color bg = LIGHTGRAY;
+    Color border = GRAY;
+
+    if (_focused) {
+        bg = WHITE;
+        border = DARKGRAY;
+    }
+    DrawRectangleRec(_rect, bg);
+    DrawRectangleLinesEx(_rect, 2, border);
+    DrawText(_value.c_str(), _rect.x + 8, _rect.y + (_rect.height / 2) - 10, 20, DARKGRAY);
 }
 
 const std::string &TextBox::getValue() const
