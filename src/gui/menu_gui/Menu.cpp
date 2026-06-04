@@ -20,6 +20,8 @@ Menu::~Menu()
 
 void Menu::draw()
 {
+    _hostInput.update();
+    _portInput.update();
     DrawTexture(_background, 0, 0, WHITE);
     DrawText("Welcome on ZAPPY GUI", 100, 100, 50, LIGHTGRAY);
     _hostInput.draw();
