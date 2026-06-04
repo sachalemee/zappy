@@ -53,7 +53,7 @@ GUI_CPPFLAGS	+= -I include/gui/
 
 SERVER_LDFLAGS	+= -lpthread
 
-GUI_LDFLAGS		+= -lsfml-graphics -lsfml-window -lsfml-system -lsfml-network
+GUI_LDFLAGS		+= -lraylib
 
 ## Makefile compilation rules definition
 all:			zappy_server zappy_gui zappy_ai
