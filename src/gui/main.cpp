@@ -5,11 +5,25 @@
 ** main
 */
 
-#include "zappy.hpp"
+//#include "zappy.hpp"
+#include <stdio.h>
+#include <raylib.h>
 
-int main(int ac, char **av)
+int main()
 {
-    if (error_handling(ac, av) == IS_EXIT_FAILURE)
-        return IS_EXIT_FAILURE;
-    return IS_EXIT_SUCCESS;
+    InitWindow(1920, 1080, "ZAPPY GUI");
+    SetTargetFPS(60);
+    Texture2D background = LoadTexture("background.jpg");
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(BLACK);
+        DrawTexture(background, 0, 0, WHITE);
+        DrawText("Welcome on ZAPPY GUI", 100, 100, 50, LIGHTGRAY);
+        EndDrawing();
+    }
+    UnloadTexture(background);
+    CloseWindow();
+    return 0;
 }
