@@ -9,7 +9,20 @@
 
 int main(int ac, char **av)
 {
-    if (error_handling(ac, av) == IS_EXIT_FAILURE)
+    server_t server = {0};
+
+    if (error_handling(ac, av, &server) == IS_EXIT_FAILURE)
         return IS_EXIT_FAILURE;
+    if (init_server(&server) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
+    if (create_socket(&server) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
+    if (bind_socket(&server) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
+    if (listen_socket(&server) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
+    if (run_server(&server) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
+    destroy_server(&server);
     return IS_EXIT_SUCCESS;
 }
