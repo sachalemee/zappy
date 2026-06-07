@@ -7,15 +7,24 @@
 
 
 ## SERVER
-SERVER_SRC		= $(addprefix src/server/, \
-					main.c \
-					error_handling.c \
-					helper.c \
-				)
+SERVER_SRC = $(addprefix src/server/, \
+				main.c \
+				parsing/helper.c \
+				parsing/error_handling.c \
+				parsing/parse_args.c \
+				parsing/parse_teams.c \
+				server/accept_client.c \
+				server/bind_socket.c \
+				server/create_socket.c \
+				server/destroy_server.c \
+				server/init_server.c \
+				server/listen_socket.c \
+				server/poll_loop.c \
+			)
 
 SERVER_NAME		= zappy_server
-SERVER_OBJ		= $(addprefix obj/server/, $(notdir $(SERVER_SRC:.c=.o)))
-SERVER_OBJ_DIR		= obj/server
+SERVER_OBJ 		= $(SERVER_SRC:src/server/%.c=obj/server/%.o)
+SERVER_OBJ_DIR	= obj/server
 
 ## GUI
 GUI_SRC			= $(addprefix src/gui/, \
@@ -78,8 +87,9 @@ zappy_ai:
 				$(MV) $(AI_NAME)$(AI_FILE_EXT) $(AI_NAME)
 
 ## Compilation rules for object files
-obj/server/%.o:	src/server/%.c
-				$(CC) $(CFLAGS) $(CPPFLAGS) $(SERVER_CPPFLAGS) -c $< -o $@
+obj/server/%.o: src/server/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(SERVER_CPPFLAGS) -c $< -o $@
 
 obj/gui/%.o:	src/gui/%.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
