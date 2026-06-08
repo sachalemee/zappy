@@ -8,19 +8,21 @@
 
 ## SERVER
 SERVER_SRC = $(addprefix src/server/, \
-				main.c \
-				parsing/helper.c \
-				parsing/error_handling.c \
-				parsing/parse_args.c \
-				parsing/parse_teams.c \
-				server/accept_client.c \
-				server/bind_socket.c \
-				server/create_socket.c \
-				server/destroy_server.c \
-				server/init_server.c \
-				server/listen_socket.c \
-				server/poll_loop.c \
-			)
+                main.c \
+                parsing/helper.c \
+                parsing/error_handling.c \
+                parsing/parse_args.c \
+                parsing/parse_teams.c \
+                server/accept_client.c \
+                server/bind_socket.c \
+                server/create_socket.c \
+                server/destroy_server.c \
+                server/init_server.c \
+                server/init_map.c \
+                server/listen_socket.c \
+                server/poll_loop.c \
+                server/refill_map.c \
+            )
 
 SERVER_NAME		= zappy_server
 SERVER_OBJ 		= $(SERVER_SRC:src/server/%.c=obj/server/%.o)
