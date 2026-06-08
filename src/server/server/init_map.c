@@ -33,6 +33,8 @@ int init_map(server_t *s)
 {
     if (s->width <= 0 || s->height <= 0)
         return IS_EXIT_FAILURE;
+    s->map.width = s->width;
+    s->map.height = s->height;
     if (alloc_tiles(&s->map) == IS_EXIT_FAILURE)
         return IS_EXIT_FAILURE;
     refill_map(s);
