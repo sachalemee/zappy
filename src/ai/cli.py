@@ -5,16 +5,14 @@
 ## cli
 ##
 
-from dataclasses import dataclass
-
 from src.ai.helper import helper
 
 
-@dataclass
 class Config:
-    port: int
-    name: str
-    machine: str = "localhost"
+    def __init__(self, port: int, name: str, machine: str = "localhost"):
+        self.port = port
+        self.name = name
+        self.machine = machine
 
 
 def parse_args(argv: list[str]) -> Config:
