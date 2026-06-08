@@ -14,11 +14,11 @@ int init_server(server_t *server)
         return IS_EXIT_FAILURE;
     server->server_fd = -1;
     server->nb_players = 0;
-    server->map.width = 0;
-    server->map.height = 0;
     server->map.tiles = NULL;
-    server->teams = NULL;
-    server->nb_teams = 0;
     server->players = NULL;
+    server->clients = NULL;
+    server->nb_clients = 0;
+    if (init_map(server) == IS_EXIT_FAILURE)
+        return IS_EXIT_FAILURE;
     return IS_EXIT_SUCCESS;
 }

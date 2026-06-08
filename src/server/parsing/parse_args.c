@@ -8,7 +8,22 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stddef.h>
 #include "zappy.h"
+
+typedef struct arg_map_s {
+    char *flag;
+    size_t offset;
+} arg_map_t;
+
+static const arg_map_t INT_ARGS[] = {
+    {"-p", offsetof(server_t, port)},
+    {"-x", offsetof(server_t, width)},
+    {"-y", offsetof(server_t, height)},
+    {"-c", offsetof(server_t, clients_nb)},
+    {"-f", offsetof(server_t, freq)},
+    {NULL, 0}
+};
 
 static int is_flag(char *str)
 {
@@ -59,32 +74,42 @@ static team_t *build_teams(char **names, int clients_nb)
     return teams;
 }
 
+static int handle_teams(char **av, int *i, server_t *s)
+{
+    char **names;
+
+    (*i)++;
+    names = parse_teams(av, i);
+    if (!names)
+        return IS_EXIT_FAILURE;
+    s->teams = build_teams(names, s->clients_nb);
+    if (!s->teams)
+        return IS_EXIT_FAILURE;
+    s->nb_teams = count_teams(names);
+    (*i)--;
+    return IS_EXIT_SUCCESS;
+}
+
+static int parse_single_arg(char **av, int *i, server_t *s)
+{
+    int *target;
+
+    if (strcmp(av[*i], "-n") == 0)
+        return handle_teams(av, i, s);
+    for (int j = 0; INT_ARGS[j].flag; j++) {
+        if (strcmp(av[*i], INT_ARGS[j].flag) == 0) {
+            target = (int *)((char *)s + INT_ARGS[j].offset);
+            *target = get_int(av, i);
+            return IS_EXIT_SUCCESS;
+        }
+    }
+    return IS_EXIT_FAILURE;
+}
+
 int parse_args(int ac, char **av, server_t *s)
 {
     for (int i = 1; i < ac; i++) {
-        if (strcmp(av[i], "-p") == 0)
-            s->port = get_int(av, &i);
-        else if (strcmp(av[i], "-x") == 0)
-            s->width = get_int(av, &i);
-        else if (strcmp(av[i], "-y") == 0)
-            s->height = get_int(av, &i);
-        else if (strcmp(av[i], "-c") == 0)
-            s->clients_nb = get_int(av, &i);
-        else if (strcmp(av[i], "-f") == 0)
-            s->freq = get_int(av, &i);
-        else if (strcmp(av[i], "-n") == 0) {
-            i++;
-            char **names = parse_teams(av, &i);
-
-            if (!names)
-                return IS_EXIT_FAILURE;
-            s->teams = build_teams(names, s->clients_nb);
-            if (!s->teams)
-                return IS_EXIT_FAILURE;
-            s->nb_teams = count_teams(names);
-            i--;
-        }
-        else
+        if (parse_single_arg(av, &i, s) == IS_EXIT_FAILURE)
             return IS_EXIT_FAILURE;
     }
     return IS_EXIT_SUCCESS;
