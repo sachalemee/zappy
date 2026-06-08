@@ -110,5 +110,7 @@ int helper(void);
 
 int init_server(server_t *s);
 void destroy_server(server_t *s);
+int init_map(server_t *s);
+void refill_map(server_t *s);
 
 #endif
