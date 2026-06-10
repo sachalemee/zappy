@@ -36,6 +36,7 @@ GUI_SRC			= $(addprefix src/gui/, \
 					Window.cpp \
 					menu_gui/Menu.cpp \
 					menu_gui/TextBox.cpp \
+					settings.cpp \
 				)
 
 GUI_NAME		= zappy_gui
