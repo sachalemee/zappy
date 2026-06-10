@@ -49,8 +49,8 @@ void TextBox::draw()
     Color border = _focused ? Color{46, 204, 113, 255} : Color{70, 74, 86, 255};
 
     DrawRectangleRounded(_rect, 0.3f, 6, bg);
-    DrawRectangleRoundedLinesEx(_rect, 0.3f, 6, 2, border);
-
+    DrawRectangleLinesEx(_rect, 2, border);
+    
     int fontSize = 20;
     int tx = static_cast<int>(_rect.x) + 14;
     int ty = static_cast<int>(_rect.y + (_rect.height - fontSize) / 2);
