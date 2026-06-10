@@ -41,7 +41,7 @@ void Settings::drawKeyRow(float x, float y, const char *key, const char *label)
 {
     Rectangle box = {x, y, 44, 44};
     DrawRectangleRounded(box, 0.25f, 6, Color{45, 48, 58, 255});
-    DrawRectangleRoundedLinesEx(box, 0.25f, 6, 2, Color{80, 84, 96, 255});
+    DrawRectangleLinesEx(box, 2, Color{80, 84, 96, 255});
 
     int kw = MeasureText(key, 24);
     DrawText(key, static_cast<int>(x) + (44 - kw) / 2,
@@ -62,7 +62,7 @@ void Settings::drawPanel()
     _panel = {(GetScreenWidth() - pw) / 2.0f,
             (GetScreenHeight() - ph) / 2.0f, pw, ph};
     DrawRectangleRounded(_panel, 0.05f, 8, Color{28, 30, 38, 255});
-    DrawRectangleRoundedLinesEx(_panel, 0.05f, 8, 2, Color{60, 64, 76, 255});
+    DrawRectangleLinesEx(_panel, 2, Color{60, 64, 76, 255});
 }
 
 void Settings::drawTitle()
@@ -151,13 +151,13 @@ void Settings::drawWindowMode()
 {
     float x = _panel.x + 380;
     float y = _panel.y + 110;
-    
+
     Rectangle btn = {x, y + 220, 220, 46};
     bool over = CheckCollisionPointRec(GetMousePosition(), btn);
 
     DrawRectangleRounded(btn, 0.3f, 6, over ?
             Color{70, 74, 86, 255} : Color{50, 54, 64, 255});
-    DrawRectangleRoundedLinesEx(btn, 0.3f, 6, 2, Color{80, 84, 96, 255});
+    DrawRectangleLinesEx(btn, 2, Color{80, 84, 96, 255});
     const char *label = "Window mode";
     DrawText(label, static_cast<int>(btn.x + (btn.width - MeasureText(label, 20)) / 2),
              static_cast<int>(btn.y) + 13, 20, RAYWHITE);
