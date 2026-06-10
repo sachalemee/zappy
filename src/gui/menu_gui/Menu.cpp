@@ -83,8 +83,7 @@ void Menu::drawBackground() const
 void Menu::drawCard() const
 {
     DrawRectangleRounded(_card, 0.06f, 8, Color{28, 30, 38, 235});
-    DrawRectangleRoundedLinesEx(_card, 0.06f, 8, 2,
-        Color{60, 64, 76, 255});
+    DrawRectangleLinesEx(_card, 2, Color{60, 64, 76, 255});
 }
 
 void Menu::drawTitle() const
@@ -147,8 +146,7 @@ void Menu::drawSettingsButton() const
     int y = static_cast<int>(_settingsBtn.y) + 12;
 
     DrawRectangleRounded(_settingsBtn, 0.3f, 8, color);
-    DrawRectangleRoundedLinesEx(_settingsBtn, 0.3f, 8, 2,
-        Color{70, 74, 86, 255});
+    DrawRectangleLinesEx(_settingsBtn, 2, Color{70, 74, 86, 255});
     DrawText(text, x, y, 20, LIGHTGRAY);
 }
 
