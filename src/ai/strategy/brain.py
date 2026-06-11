@@ -14,5 +14,4 @@ class Brain:
         self.state = state
 
     def decide(self) -> Action:
-        ## Rule-based first, swappable for an ML-backed decision later (see ml/model.py)
         pass
