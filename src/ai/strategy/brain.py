@@ -8,7 +8,6 @@
 from src.ai.game.state import GameState
 from src.ai.strategy.actions import Action
 
-
 class Brain:
     def __init__(self, state: GameState):
         self.state = state
