@@ -75,5 +75,22 @@ class Navigator:
         if target == game_state.position:
             return Action.FORWARD
 
+        x, y = game_state.position
+        tx, ty = target
+
+        dx = self.shortest_delta(tx - x, game_state.map_width)
+        dy = self.shortest_delta(ty - y, game_state.map_height)
+
+        if dx > 0:
+            wanted_direction = 1
+        elif dx < 0:
+            wanted_direction = 3
+        elif dy < 0:
+            wanted_direction = 0
+        else:
+            wanted_direction = 2
+        if wanted_direction == game_state.direction:
+            return Action.FORWARD
+        if (game_state.direction + 1) % 4 == wanted_direction:
+            return Action.RIGHT
         return Action.LEFT
-    
