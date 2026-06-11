@@ -64,11 +64,16 @@ class Navigator:
                 if neighbor not in self.visited:
                     self.stack.append(previous)
                     return neighbor
+
+        self.visited.clear()
+        self.stack.clear()
         return position
 
     def move_toward_ressource(self, game_state) -> Action:
         target = self.next_target(game_state)
+
         if target == game_state.position:
             return Action.FORWARD
+
         return Action.LEFT
     
