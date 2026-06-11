@@ -18,7 +18,7 @@ class Protocol:
         self.pending: deque[Action] = deque()
 
     def handshake(self, team_name: str) -> tuple[int, int]:
-        ## WELCOME -> TEAM-NAME -> CLIENT-NUM -> X Y
+        # WELCOME -> TEAM-NAME -> CLIENT-NUM -> X Y
         pass
 
     def can_send(self) -> bool:
