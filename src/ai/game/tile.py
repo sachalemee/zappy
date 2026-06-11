@@ -7,14 +7,15 @@
 
 
 class Tile:
-    RESOURCES = ("food",
-                "linemate",
-                "deraumere",
-                "sibur",
-                "mendiane",
-                "phiras",
-                "thystame"
-                )
+    RESOURCES = (
+        "food",
+        "linemate",
+        "deraumere",
+        "sibur",
+        "mendiane",
+        "phiras",
+        "thystame"
+    )
 
     def __init__(self):
         self.resources: dict[str, int] = {name: 0 for name in Tile.RESOURCES}

@@ -7,7 +7,6 @@
 
 import socket
 
-
 class Connection:
     def __init__(self, machine: str, port: int):
         self.machine = machine

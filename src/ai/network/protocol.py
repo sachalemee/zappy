@@ -11,7 +11,6 @@ from src.ai.strategy.actions import Action
 
 MAX_PENDING_COMMANDS = 10
 
-
 class Protocol:
     def __init__(self, connection: Connection):
         self.connection = connection
