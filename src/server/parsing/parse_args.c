@@ -82,6 +82,8 @@ static int handle_teams(char **av, int *i, server_t *s)
     names = parse_teams(av, i);
     if (!names)
         return IS_EXIT_FAILURE;
+    if (s->clients_nb <= 0)
+        s->clients_nb = 1;
     s->teams = build_teams(names, s->clients_nb);
     if (!s->teams)
         return IS_EXIT_FAILURE;
