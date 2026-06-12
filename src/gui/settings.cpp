@@ -95,11 +95,11 @@ void Settings::drawMovementKeys()
     float x = _panel.x + 40;
     float y = _panel.y + 110;
 
-    drawKeyRow(x, y,        "Z", "Up");
-    drawKeyRow(x, y + 60,   "S", "Down");
-    drawKeyRow(x, y + 120,  "D", "Right");
-    drawKeyRow(x, y + 180,  "Q", "Left");
-    drawKeyRow(x, y + 240,  "X", "(Un)lock");
+    drawKeyRow(x, y, "Z", "Up");
+    drawKeyRow(x, y + 60, "S", "Down");
+    drawKeyRow(x, y + 120, "D", "Right");
+    drawKeyRow(x, y + 180, "Q", "Left");
+    drawKeyRow(x, y + 240, "X", "(Un)lock");
 }
 
 void Settings::drawSensitivity()
@@ -143,7 +143,7 @@ void Settings::drawElevationKeys()
     float x = _panel.x + 380;
     float y = _panel.y + 110;
 
-    drawKeyRow(x, y + 90,  "A", "Ascend");
+    drawKeyRow(x, y + 90, "A", "Ascend");
     drawKeyRow(x, y + 150, "E", "Descend");
 }
 

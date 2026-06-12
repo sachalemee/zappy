@@ -50,7 +50,7 @@ void TextBox::draw()
 
     DrawRectangleRounded(_rect, 0.3f, 6, bg);
     DrawRectangleLinesEx(_rect, 2, border);
-    
+
     int fontSize = 20;
     int tx = static_cast<int>(_rect.x) + 14;
     int ty = static_cast<int>(_rect.y + (_rect.height - fontSize) / 2);
