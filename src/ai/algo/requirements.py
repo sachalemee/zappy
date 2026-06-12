@@ -38,3 +38,7 @@ def missing_resources(level: int, inventory: dict) -> dict:
         available_amount = inventory.get(resource, 0)
         missing[resource] = max(0, required_amount - available_amount)
     return missing
+
+def has_enough_players(level: int, players_here: int) -> bool:
+    required_players = INCANTATION_REQUIREMENTS.get(level, {}).get("players", 0)
+    return players_here >= required_players
