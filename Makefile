@@ -13,15 +13,26 @@ SERVER_SRC = $(addprefix src/server/, \
                 parsing/error_handling.c \
                 parsing/parse_args.c \
                 parsing/parse_teams.c \
-                server/accept_client.c \
-                server/bind_socket.c \
-                server/create_socket.c \
-                server/destroy_server.c \
-                server/init_server.c \
-                server/init_map.c \
-                server/listen_socket.c \
-                server/poll_loop.c \
-                server/refill_map.c \
+                network/accept_client.c \
+                network/bind_socket.c \
+                network/create_socket.c \
+                network/destroy_server.c \
+                network/init_server.c \
+                network/init_map.c \
+                network/listen_socket.c \
+                network/poll_loop.c \
+                network/refill_map.c \
+				team/find_team.c	\
+				player/add_player.c	\
+				player/create_player.c	\
+				commands/command_table.c	\
+				commands/execute_command.c	\
+				commands/push_command.c	\
+				commands/forward.c	\
+				commands/left.c	\
+				commands/right.c	\
+				commands/look.c	\
+				commands/inventory.c	\
             )
 
 SERVER_NAME		= zappy_server
