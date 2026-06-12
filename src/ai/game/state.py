@@ -18,8 +18,10 @@ class GameState:
         self.inventory = Inventory()
         self.vision: list[Tile] = []
 
-    def update_vision(self, tiles: list[Tile]) -> None:
-        self.vision = tiles
+    def update_vision(self, line: str) -> None:
+        ## line looks like "[player, , thystame, , food, ...]"
+        content = line.strip("[]")
+        self.vision = [Tile.from_look_entry(entry) for entry in content.split(",")]
 
-    def update_inventory(self, inventory: Inventory) -> None:
-        self.inventory = inventory
+    def update_inventory(self, line: str) -> None:
+        self.inventory = Inventory.from_response(line)
