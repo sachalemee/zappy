@@ -17,14 +17,16 @@ from src.ai.strategy.actions import Action
 NORTH, EAST, SOUTH, WEST = range(4)
 
 class GameState:
-    def __init__(self, map_width: int, map_height: int):
+    def __init__(self, map_width: int, map_height: int, team_name: str = ""):
         self.map_width = map_width
         self.map_height = map_height
+        self.team_name = team_name
         self.position = (0, 0)
         self.direction = NORTH
         self.level = 1
         self.inventory = Inventory()
         self.vision: list[Tile] = []
+        self.incoming_call: tuple[int, int] | None = None # (level, k) of the last incantation call heard (FROM TUNG TUNG SAHUR) from a teammate at our level or none
 
     def update_vision(self, tiles: list[Tile]) -> None:
         self.vision = tiles

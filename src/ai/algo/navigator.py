@@ -94,3 +94,13 @@ class Navigator:
         if (game_state.direction + 1) % 4 == wanted_direction:
             return Action.RIGHT
         return Action.LEFT
+
+    @staticmethod
+    def move_toward_sound(k: int) -> Action:
+        # k -> sound direction from a broadcast (0=here, 1=front, 2..8 clockwise around the player)
+        # k == 0 -> player already arrived
+        if k == 1:
+            return Action.FORWARD
+        if k in (2, 3, 4, 5):
+            return Action.RIGHT
+        return Action.LEFT
