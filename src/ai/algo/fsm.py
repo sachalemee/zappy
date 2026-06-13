@@ -7,7 +7,7 @@
 
 from enum import Enum, auto
 
-from src.ai.algo.requirements import missing_resources
+from src.ai.algo.requirements import missing_resources, has_enough_players
 
 SURVIVAL_THRESHOLD = 50 # food units below which survival takes priority over EVERYTHING else
 
@@ -26,6 +26,7 @@ class State(Enum):
     SURVIVE = auto()
     COLLECT = auto()
     BROADCAST = auto()
+    GATHER = auto()
     INCANTATE = auto()
     FORK = auto()
 
@@ -52,8 +53,18 @@ class FSM:
     def transition(self, game_state) -> None:
         if game_state.inventory.quantity_of("food") < SURVIVAL_THRESHOLD:
             self.state = State.SURVIVE
-        elif self.ready_to_incantate(game_state):
+            return
+
+        tile = game_state.current_tile()
+        resources_ready = self.ready_to_incantate(game_state)
+        players_ready = tile is not None and has_enough_players(game_state.level, tile.players_here)
+
+        if resources_ready and players_ready:
             self.state = State.INCANTATE
+        elif resources_ready and not players_ready:
+            self.state = State.BROADCAST
+        elif game_state.incoming_call is not None and game_state.incoming_call[0] == game_state.level:
+            self.state = State.GATHER
         elif self.has_fork_surplus(game_state):
             self.state = State.FORK
         else:

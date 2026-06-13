@@ -14,6 +14,7 @@ from src.ai.strategy.actions import Action
 from src.ai.algo.fsm import FSM, State
 from src.ai.algo.requirements import missing_resources
 from src.ai.algo.navigator import Navigator
+from src.ai.algo.coordinator import Coordinator
 
 class Brain:
     def __init__(self, state: GameState):
@@ -30,6 +31,15 @@ class Brain:
             return Action.INCANTATION
         if self.fsm.state == State.FORK:
             return Action.FORK
+        if self.fsm.state == State.BROADCAST:
+            self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+            return Action.BROADCAST
+        if self.fsm.state == State.GATHER:
+            _, k = self.state.incoming_call
+            if k == 0:
+                self.state.incoming_call = None
+            else:
+                return Navigator.move_toward_sound(k)
 
         tile = self.state.current_tile()
 
@@ -45,6 +55,17 @@ class Brain:
                     return Action.TAKE
 
         return self.navigator.move_toward_ressource(self.state)
+
+    def handle_broadcast(self, line: str) -> bool:
+        parsed = Coordinator.parse_broadcast_line(line)
+        if parsed is None:
+            return False
+
+        k, text = parsed
+        level = Coordinator.parse_incant_call(self.state.team_name, text)
+        if level is not None and level == self.state.level:
+            self.state.incoming_call = (level, k)
+        return True
 
     def update(self, action: Action, response: str) -> None:
         response = response.strip()
