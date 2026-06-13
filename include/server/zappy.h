@@ -10,6 +10,8 @@
 
 #define IS_EXIT_FAILURE 84
 #define IS_EXIT_SUCCESS 0
+#define MAX_CMDS 10
+#define MAX_CMD_LEN 1024
 
 typedef struct server_s server_t;
 
@@ -59,14 +61,16 @@ typedef enum client_state_e {
 typedef struct client_s {
     int fd;
     client_state_t state;
-
-    char buffer[1024];
+    char buffer[MAX_CMD_LEN];
     int buf_len;
-
+    char cmds[MAX_CMDS][MAX_CMD_LEN];
+    int nb_cmds;
     server_t *server;
     team_t *team;
     player_t *player;
 } client_t;
+
+void extract_commands(client_t *c);
 
 //SERVER CORE
 
