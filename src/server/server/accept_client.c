@@ -20,6 +20,7 @@ static client_t *create_client(int fd, server_t *s)
     c->state = STATE_WELCOME;
     c->buf_len = 0;
     c->nb_cmds = 0;
+    c->action_end_time = 0;
     c->server = s;
     c->team = NULL;
     c->player = NULL;
