@@ -119,5 +119,8 @@ void extract_commands(client_t *c);
 void handle_handshake(client_t *c);
 long long get_current_time(void);
 long long get_action_duration(int freq, int action_cost);
+int calculate_timeout(server_t *s);
+void handle_active_commands(server_t *s);
+void pop_command(client_t *c);
 
 #endif
