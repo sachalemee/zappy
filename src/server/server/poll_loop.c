@@ -10,13 +10,23 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 #include "zappy.h"
+
+static volatile int server_is_running = 1;
+
+static void sigint_handler(int dummy)
+{
+    (void)dummy;
+    server_is_running = 0;
+}
 
 static void remove_client(server_t *s, int i)
 {
     if (!s->clients || !s->clients[i])
         return;
-    close(s->clients[i]->fd);
+    if (s->clients[i]->fd != -1)
+        close(s->clients[i]->fd);
     free(s->clients[i]);
     for (int j = i; j < s->nb_clients - 1; j++) {
         s->clients[j] = s->clients[j + 1];
@@ -90,13 +100,17 @@ int run_server(server_t *s)
     int nfds;
     int timeout;
 
+    signal(SIGINT, sigint_handler);
     printf("Server running...\n");
-    while (1) {
+    while (server_is_running) {
         handle_active_commands(s);
         nfds = build_poll_fds(s, fds);
         timeout = calculate_timeout(s);
-        if (poll(fds, nfds, timeout) < 0)
+        if (poll(fds, nfds, timeout) < 0) {
+            if (!server_is_running)
+                break;
             return IS_EXIT_FAILURE;
+        }
         process_poll_events(s, fds, nfds);
     }
     return IS_EXIT_SUCCESS;
