@@ -94,6 +94,14 @@ typedef struct server_s {
     int nb_clients;
 } server_t;
 
+typedef void (*cmd_func_t)(server_t *, client_t *);
+
+typedef struct cmd_map_s {
+    char *name;
+    int time_cost;
+    cmd_func_t func;
+} cmd_map_t;
+
 //SERVER NETWORK
 
 int create_socket(server_t *s);
@@ -122,5 +130,8 @@ long long get_action_duration(int freq, int action_cost);
 int calculate_timeout(server_t *s);
 void handle_active_commands(server_t *s);
 void pop_command(client_t *c);
+void cmd_forward(server_t *s, client_t *c);
+void cmd_right(server_t *s, client_t *c);
+void cmd_left(server_t *s, client_t *c);
 
 #endif
