@@ -23,6 +23,7 @@ SERVER_SRC = $(addprefix src/server/, \
                 server/poll_loop.c \
                 server/refill_map.c \
 				server/client_buffer.c	\
+				server/handshake.c	\
             )
 
 SERVER_NAME		= zappy_server
