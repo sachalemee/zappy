@@ -22,6 +22,7 @@ SERVER_SRC = $(addprefix src/server/, \
                 server/listen_socket.c \
                 server/poll_loop.c \
                 server/refill_map.c \
+				server/client_buffer.c	\
             )
 
 SERVER_NAME		= zappy_server
@@ -67,7 +68,7 @@ GUI_CPPFLAGS	+= -I include/gui/
 
 SERVER_LDFLAGS	+= -lpthread
 
-GUI_LDFLAGS		+= -lraylib
+GUI_LDFLAGS     += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 ## Makefile compilation rules definition
 all:			zappy_server zappy_gui zappy_ai
