@@ -44,6 +44,7 @@ static void handle_client(client_t *c)
     if (c->state == STATE_WELCOME)
         handle_handshake(c);
 }
+
 static int build_poll_fds(server_t *s, struct pollfd *fds)
 {
     int idx = 0;
