@@ -8,7 +8,8 @@
 #include "commands.h"
 #include <unistd.h>
 
-void cmd_inventory(client_t *c)
+void cmd_inventory(server_t *s, client_t *c)
 {
+    (void)s;
     write(c->fd, "[food 10]\n", 11);
 }

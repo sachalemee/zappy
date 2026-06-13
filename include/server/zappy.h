@@ -10,6 +10,8 @@
 
 #define IS_EXIT_FAILURE 84
 #define IS_EXIT_SUCCESS 0
+#define MAX_CMDS 10
+#define MAX_CMD_LEN 1024
 
 typedef struct server_s server_t;
 
@@ -68,19 +70,16 @@ typedef struct command_s {
 
 typedef struct client_s {
     int fd;
-
     client_state_t state;
     client_type_t type;
-
-    char buffer[1024];
+    char buffer[MAX_CMD_LEN];
     int buf_len;
-
+    char cmds[MAX_CMDS][MAX_CMD_LEN];
+    int nb_cmds;
+    long long action_end_time;
     server_t *server;
     team_t *team;
     player_t *player;
-
-    command_t *cmd_queue;
-    int cmd_busy;
 } client_t;
 
 typedef struct server_s {
@@ -104,6 +103,14 @@ typedef struct server_s {
     int nb_clients;
 } server_t;
 
+typedef void (*cmd_func_t)(server_t *, client_t *);
+
+typedef struct cmd_map_s {
+    char *name;
+    int time_cost;
+    cmd_func_t func;
+} cmd_map_t;
+
 //SERVER NETWORK
 
 int create_socket(server_t *s);
@@ -125,13 +132,20 @@ int init_server(server_t *s);
 void destroy_server(server_t *s);
 int init_map(server_t *s);
 void refill_map(server_t *s);
+void extract_commands(client_t *c);
+void handle_handshake(client_t *c);
+long long get_current_time(void);
+long long get_action_duration(int freq, int action_cost);
+int calculate_timeout(server_t *s);
+void handle_active_commands(server_t *s);
+void pop_command(client_t *c);
+void cmd_forward(server_t *s, client_t *c);
+void cmd_right(server_t *s, client_t *c);
+void cmd_left(server_t *s, client_t *c);
 
 //COMMANDE
 
-void push_command(client_t *c, char *name, int delay);
-int get_command_delay(char *cmd, int freq);
 void process_commands(client_t *c);
-
 
 //TEAM
 

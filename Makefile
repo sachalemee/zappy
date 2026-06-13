@@ -15,24 +15,26 @@ SERVER_SRC = $(addprefix src/server/, \
                 parsing/parse_teams.c \
                 network/accept_client.c \
                 network/bind_socket.c \
+                network/client_buffer.c \
                 network/create_socket.c \
                 network/destroy_server.c \
+                network/handshake.c \
                 network/init_server.c \
                 network/init_map.c \
                 network/listen_socket.c \
                 network/poll_loop.c \
                 network/refill_map.c \
-				team/find_team.c	\
-				player/add_player.c	\
-				player/create_player.c	\
-				commands/command_table.c	\
-				commands/execute_command.c	\
-				commands/push_command.c	\
-				commands/forward.c	\
-				commands/left.c	\
-				commands/right.c	\
-				commands/look.c	\
-				commands/inventory.c	\
+                network/time_utils.c \
+                network/timeout.c \
+                team/find_team.c \
+                player/add_player.c \
+                player/create_player.c \
+                commands/execute_command.c \
+                commands/forward.c \
+                commands/left.c \
+                commands/right.c \
+                commands/look.c \
+                commands/inventory.c \
             )
 
 SERVER_NAME		= zappy_server
@@ -81,7 +83,7 @@ GUI_CPPFLAGS	+= -I include/gui/
 
 SERVER_LDFLAGS	+= -lpthread
 
-GUI_LDFLAGS		+= -lraylib
+GUI_LDFLAGS     += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
 ## Makefile compilation rules definition
 all:			zappy_server zappy_gui zappy_ai

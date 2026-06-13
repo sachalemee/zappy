@@ -14,6 +14,5 @@ void cmd_forward(server_t *s, client_t *c)
 
     if (c->player)
         c->player->y++;
-
     write(c->fd, "ok\n", 3);
 }
