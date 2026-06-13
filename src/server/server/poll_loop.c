@@ -27,24 +27,20 @@ static void remove_client(server_t *s, int i)
 
 static void handle_client(client_t *c)
 {
-    char buffer[1024];
+    char tmp[1024];
     int len;
 
-    len = read(c->fd, buffer, sizeof(buffer) - 1);
+    len = read(c->fd, tmp, sizeof(tmp) - 1);
     if (len <= 0) {
         c->fd = -1;
         return;
     }
-    buffer[len] = '\0';
+    tmp[len] = '\0';
     if (c->buf_len + len < 1023) {
-        strncat(c->buffer, buffer, len);
+        strncat(c->buffer, tmp, len);
         c->buf_len += len;
     }
-    if (c->state == STATE_TEAM) {
-        write(c->fd, "CLIENT-NUM\n", 11);
-        write(c->fd, "X Y\n", 4);
-        c->state = STATE_IN_GAME;
-    }
+    extract_commands(c);
 }
 
 static int build_poll_fds(server_t *s, struct pollfd *fds)
