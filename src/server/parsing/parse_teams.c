@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** *
+** ZAPPY
 ** File description:
 ** parse_teams
 */
@@ -31,7 +31,6 @@ char **parse_teams(char **av, int *i)
 
     if (!teams || count <= 0)
         return NULL;
-
     for (int j = 0; j < count; j++) {
         if (!av[*i] || is_flag(av[*i]))
             return NULL;

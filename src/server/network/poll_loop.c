@@ -51,7 +51,7 @@ static void handle_client(client_t *c)
         c->buf_len += len;
     }
     extract_commands(c);
-    if (c->state == STATE_WELCOME)
+    if (c->state == STATE_WAIT_TEAM)
         handle_handshake(c);
 }
 

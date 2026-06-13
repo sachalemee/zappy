@@ -19,7 +19,7 @@ static void shift_buffer(client_t *c, int shift_len)
     c->buffer[remaining] = '\0';
 }
 
-static int push_command(client_t *c, int cmd_len)
+static int store_raw_cmd(client_t *c, int cmd_len)
 {
     if (c->nb_cmds >= MAX_CMDS)
         return 0;
@@ -46,7 +46,7 @@ void extract_commands(client_t *c)
         }
         if (nl_pos == -1)
             break;
-        push_command(c, nl_pos);
+        store_raw_cmd(c, nl_pos);
         shift_buffer(c, nl_pos + 1);
     }
 }

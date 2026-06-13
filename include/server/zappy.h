@@ -53,14 +53,25 @@ typedef struct player_s {
 } player_t;
 
 typedef enum client_state_e {
-    STATE_WELCOME,
-    STATE_TEAM,
+    STATE_WAIT_TEAM,
     STATE_IN_GAME
 } client_state_t;
+
+typedef enum client_type_e {
+    CLIENT_AI,
+    CLIENT_GUI
+} client_type_t;
+
+typedef struct command_s {
+    char *name;
+    int delay;
+    struct command_s *next;
+} command_t;
 
 typedef struct client_s {
     int fd;
     client_state_t state;
+    client_type_t type;
     char buffer[MAX_CMD_LEN];
     int buf_len;
     char cmds[MAX_CMDS][MAX_CMD_LEN];
@@ -70,8 +81,6 @@ typedef struct client_s {
     team_t *team;
     player_t *player;
 } client_t;
-
-//SERVER CORE
 
 typedef struct server_s {
     int port;
@@ -133,5 +142,18 @@ void pop_command(client_t *c);
 void cmd_forward(server_t *s, client_t *c);
 void cmd_right(server_t *s, client_t *c);
 void cmd_left(server_t *s, client_t *c);
+
+//COMMANDE
+
+void process_commands(client_t *c);
+
+//TEAM
+
+team_t *find_team(server_t *s, const char *name);
+
+//PLAYER
+
+player_t *create_player(server_t *s, team_t *team);
+int add_player(server_t *s, player_t *p);
 
 #endif

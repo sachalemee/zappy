@@ -13,21 +13,28 @@ SERVER_SRC = $(addprefix src/server/, \
                 parsing/error_handling.c \
                 parsing/parse_args.c \
                 parsing/parse_teams.c \
-                server/accept_client.c \
-                server/bind_socket.c \
-                server/create_socket.c \
-                server/destroy_server.c \
-                server/init_server.c \
-                server/init_map.c \
-                server/listen_socket.c \
-                server/poll_loop.c \
-                server/refill_map.c \
-				server/client_buffer.c	\
-				server/handshake.c	\
-				server/time_utils.c \
-				server/timeout.c \
-                server/execute_actions.c \
-				server/commands.c	\
+                network/accept_client.c \
+                network/bind_socket.c \
+                network/client_buffer.c \
+                network/create_socket.c \
+                network/destroy_server.c \
+                network/handshake.c \
+                network/init_server.c \
+                network/init_map.c \
+                network/listen_socket.c \
+                network/poll_loop.c \
+                network/refill_map.c \
+                network/time_utils.c \
+                network/timeout.c \
+                team/find_team.c \
+                player/add_player.c \
+                player/create_player.c \
+                commands/execute_command.c \
+                commands/forward.c \
+                commands/left.c \
+                commands/right.c \
+                commands/look.c \
+                commands/inventory.c \
             )
 
 SERVER_NAME		= zappy_server
@@ -42,6 +49,9 @@ GUI_SRC			= $(addprefix src/gui/, \
 					Window.cpp \
 					menu_gui/Menu.cpp \
 					menu_gui/TextBox.cpp \
+					settings.cpp \
+					network/network_client.cpp \
+					application.cpp \
 				)
 
 GUI_NAME		= zappy_gui
@@ -107,6 +117,9 @@ obj/gui/Menu.o:		src/gui/menu_gui/Menu.cpp
 
 obj/gui/TextBox.o:	src/gui/menu_gui/TextBox.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/network_client.o:    src/gui/network/network_client.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 clean:
 				$(RM) -r $(SERVER_OBJ_DIR) $(GUI_OBJ_DIR)

@@ -4,25 +4,66 @@
 ** File description:
 ** TextBox
 */
-#include <raylib.h>
+
 #include "menu_gui/TextBox.hpp"
-#include <iostream>
-TextBox::TextBox(float x, float y, float width, float height)
-    : _rect{x, y, width, height}
+
+TextBox::TextBox(float x, float y, float w, float h,
+                 const std::string &placeholder)
+    : _rect{x, y, w, h}
+    , _value("")
+    , _placeholder(placeholder)
+    , _focused(false)
+    , _blink(0.f)
 {}
+
+void TextBox::setRect(Rectangle r)
+{
+    _rect = r;
+}
+
+void TextBox::update()
+{
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        _focused = CheckCollisionPointRec(GetMousePosition(), _rect);
+
+    if (!_focused)
+        return;
+
+    int key = GetCharPressed();
+    while (key > 0) {
+        if (key >= 32 && key <= 125 && _value.size() < 64)
+            _value += static_cast<char>(key);
+        key = GetCharPressed();
+    }
+    if (IsKeyPressed(KEY_BACKSPACE) && !_value.empty())
+        _value.pop_back();
+
+    _blink += GetFrameTime();
+    if (_blink >= 1.0f)
+        _blink = 0.f;
+}
 
 void TextBox::draw()
 {
-    Color bg = LIGHTGRAY;
-    Color border = GRAY;
+    Color bg = {45, 48, 58, 255};
+    Color border = _focused ? Color{46, 204, 113, 255} : Color{70, 74, 86, 255};
 
-    if (_focused) {
-        bg = WHITE;
-        border = DARKGRAY;
-    }
-    DrawRectangleRec(_rect, bg);
+    DrawRectangleRounded(_rect, 0.3f, 6, bg);
     DrawRectangleLinesEx(_rect, 2, border);
-    DrawText(_value.c_str(), _rect.x + 8, _rect.y + (_rect.height / 2) - 10, 20, DARKGRAY);
+
+    int fontSize = 20;
+    int tx = static_cast<int>(_rect.x) + 14;
+    int ty = static_cast<int>(_rect.y + (_rect.height - fontSize) / 2);
+
+    if (_value.empty() && !_focused) {
+        DrawText(_placeholder.c_str(), tx, ty, fontSize, Color{120, 124, 134, 255});
+        return;
+    }
+    DrawText(_value.c_str(), tx, ty, fontSize, RAYWHITE);
+    if (_focused && _blink < 0.5f) {
+        int w = MeasureText(_value.c_str(), fontSize);
+        DrawText("|", tx + w + 2, ty, fontSize, RAYWHITE);
+    }
 }
 
 const std::string &TextBox::getValue() const
@@ -30,28 +71,7 @@ const std::string &TextBox::getValue() const
     return _value;
 }
 
-bool TextBox::mouseIsOver() const
+void TextBox::setValue(const std::string &v)
 {
-    return CheckCollisionPointRec(GetMousePosition(), _rect);
-}
-
-void TextBox::update()
-{
-    int key = 0;
-
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        _focused = mouseIsOver();
-    if (!_focused)
-        return;
-    key = GetCharPressed();
-    while (key > 0) {
-        if (key >= 32) {
-            _value += char(key);
-            std::cout << "Key pressed: " << char(key) << std::endl;
-            std::cout << "Current value: " << _value << std::endl;
-        }
-        key = GetCharPressed();
-    }
-    if (IsKeyPressed(KEY_BACKSPACE) && !_value.empty())
-        _value.pop_back();
+    _value = v;
 }

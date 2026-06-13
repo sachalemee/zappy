@@ -5,19 +5,14 @@
 ** main
 */
 
+#include "application.hpp"
 #include "zappy.hpp"
-#include "Window.hpp"
-#include "menu_gui/Menu.hpp"
-
+ 
 int main()
 {
-    Window window(1920, 1080, "ZAPPY GUI");
-    Menu menu;
-
-    while (!window.shouldClose()) {
-        window.beginFrame();
-        menu.draw();
-        window.endFrame();
-    }
+    application app;
+ 
+    app.run();
     return IS_EXIT_SUCCESS;
 }
+ 

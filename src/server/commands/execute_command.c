@@ -2,17 +2,20 @@
 ** EPITECH PROJECT, 2026
 ** zappy
 ** File description:
-** execute_actions
+** execute_command
 */
 
 #include <string.h>
 #include <unistd.h>
+#include "commands.h"
 #include "zappy.h"
 
 static const cmd_map_t CMD_TABLE[] = {
     {"Forward", 7, cmd_forward},
     {"Right", 7, cmd_right},
     {"Left", 7, cmd_left},
+    {"Look", 7, cmd_look},
+    {"Inventory", 1, cmd_inventory},
     {NULL, 0, NULL}
 };
 
