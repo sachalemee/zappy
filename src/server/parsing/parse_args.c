@@ -57,7 +57,7 @@ static int count_teams(char **names)
     return i;
 }
 
-static team_t *build_teams(char **names, int clients_nb)
+static team_t *build_teams(char **names)
 {
     int count = count_teams(names);
     team_t *teams = malloc(sizeof(team_t) * (count + 1));
@@ -66,7 +66,7 @@ static team_t *build_teams(char **names, int clients_nb)
         return NULL;
     for (int i = 0; i < count; i++) {
         teams[i].name = strdup(names[i]);
-        teams[i].free_slots = clients_nb;
+        teams[i].free_slots = 0;
         if (!teams[i].name)
             return NULL;
     }
@@ -82,7 +82,7 @@ static int handle_teams(char **av, int *i, server_t *s)
     names = parse_teams(av, i);
     if (!names)
         return IS_EXIT_FAILURE;
-    s->teams = build_teams(names, s->clients_nb);
+    s->teams = build_teams(names);
     if (!s->teams)
         return IS_EXIT_FAILURE;
     s->nb_teams = count_teams(names);
@@ -111,6 +111,9 @@ int parse_args(int ac, char **av, server_t *s)
     for (int i = 1; i < ac; i++) {
         if (parse_single_arg(av, &i, s) == IS_EXIT_FAILURE)
             return IS_EXIT_FAILURE;
+    }
+    for (int i = 0; i < s->nb_teams; i++) {
+        s->teams[i].free_slots = s->clients_nb;
     }
     return IS_EXIT_SUCCESS;
 }
