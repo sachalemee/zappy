@@ -83,9 +83,12 @@ static int handle_teams(char **av, int *i, server_t *s)
     if (!names)
         return IS_EXIT_FAILURE;
     s->teams = build_teams(names);
-    if (!s->teams)
+    if (!s->teams) {
+        free(names);
         return IS_EXIT_FAILURE;
+    }
     s->nb_teams = count_teams(names);
+    free(names);
     (*i)--;
     return IS_EXIT_SUCCESS;
 }
