@@ -88,11 +88,14 @@ int run_server(server_t *s)
 {
     struct pollfd fds[1024];
     int nfds;
+    int timeout;
 
     printf("Server running...\n");
     while (1) {
+        handle_active_commands(s);
         nfds = build_poll_fds(s, fds);
-        if (poll(fds, nfds, -1) < 0)
+        timeout = calculate_timeout(s);
+        if (poll(fds, nfds, timeout) < 0)
             return IS_EXIT_FAILURE;
         process_poll_events(s, fds, nfds);
     }
