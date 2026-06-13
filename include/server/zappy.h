@@ -65,6 +65,7 @@ typedef struct client_s {
     int buf_len;
     char cmds[MAX_CMDS][MAX_CMD_LEN];
     int nb_cmds;
+    long long action_end_time;
     server_t *server;
     team_t *team;
     player_t *player;
@@ -116,5 +117,7 @@ int init_map(server_t *s);
 void refill_map(server_t *s);
 void extract_commands(client_t *c);
 void handle_handshake(client_t *c);
+long long get_current_time(void);
+long long get_action_duration(int freq, int action_cost);
 
 #endif
