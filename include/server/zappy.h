@@ -70,8 +70,6 @@ typedef struct client_s {
     player_t *player;
 } client_t;
 
-void extract_commands(client_t *c);
-
 //SERVER CORE
 
 typedef struct server_s {
@@ -116,5 +114,7 @@ int init_server(server_t *s);
 void destroy_server(server_t *s);
 int init_map(server_t *s);
 void refill_map(server_t *s);
+void extract_commands(client_t *c);
+void handle_handshake(client_t *c);
 
 #endif
