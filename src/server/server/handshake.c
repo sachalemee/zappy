@@ -10,16 +10,6 @@
 #include <unistd.h>
 #include "zappy.h"
 
-static void pop_command(client_t *c)
-{
-    if (c->nb_cmds <= 0)
-        return;
-    for (int i = 0; i < c->nb_cmds - 1; i++) {
-        strncpy(c->cmds[i], c->cmds[i + 1], MAX_CMD_LEN);
-    }
-    c->nb_cmds--;
-}
-
 static void assign_graphic(client_t *c)
 {
     c->state = STATE_IN_GAME;

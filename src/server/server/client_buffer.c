@@ -50,3 +50,13 @@ void extract_commands(client_t *c)
         shift_buffer(c, nl_pos + 1);
     }
 }
+
+void pop_command(client_t *c)
+{
+    if (c->nb_cmds <= 0)
+        return;
+    for (int i = 0; i < c->nb_cmds - 1; i++) {
+        strncpy(c->cmds[i], c->cmds[i + 1], MAX_CMD_LEN);
+    }
+    c->nb_cmds--;
+}
