@@ -103,6 +103,7 @@ int run_server(server_t *s)
     signal(SIGINT, sigint_handler);
     printf("Server running...\n");
     while (server_is_running) {
+        handle_famine(s);
         handle_active_commands(s);
         nfds = build_poll_fds(s, fds);
         timeout = calculate_timeout(s);
