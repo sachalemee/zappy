@@ -50,6 +50,7 @@ typedef struct player_s {
     int orientation;
     int inventory[RESOURCE_MAX];
     team_t *team;
+    long long next_meal_time;
 } player_t;
 
 typedef enum client_state_e {
@@ -118,6 +119,7 @@ int bind_socket(server_t *s);
 int listen_socket(server_t *s);
 int run_server(server_t *s);
 int accept_client(server_t *s);
+void send_to_gui(server_t *s, const char *msg);
 
 //PARSING
 
@@ -142,6 +144,7 @@ void pop_command(client_t *c);
 void cmd_forward(server_t *s, client_t *c);
 void cmd_right(server_t *s, client_t *c);
 void cmd_left(server_t *s, client_t *c);
+void handle_famine(server_t *s);
 
 //COMMANDE
 
