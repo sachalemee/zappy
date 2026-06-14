@@ -30,11 +30,15 @@ static void free_teams(team_t *teams)
     free(teams);
 }
 
-static void free_players(player_t **players)
+static void free_players(server_t *s)
 {
-    if (!players)
+    if (!s || !s->players)
         return;
-    free(players);
+    for (int i = 0; i < s->nb_players; i++) {
+        if (s->players[i])
+            free(s->players[i]);
+    }
+    free(s->players);
 }
 
 static void free_clients(server_t *s)
@@ -59,6 +63,6 @@ void destroy_server(server_t *server)
         close(server->server_fd);
     free_map(&server->map);
     free_teams(server->teams);
-    free_players(server->players);
+    free_players(server);
     free_clients(server);
 }
