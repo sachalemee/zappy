@@ -26,6 +26,8 @@ SERVER_SRC = $(addprefix src/server/, \
                 network/refill_map.c \
                 network/time_utils.c \
                 network/timeout.c \
+                network/gui_broadcast.c \
+                network/famine.c    \
                 team/find_team.c \
                 player/add_player.c \
                 player/create_player.c \
