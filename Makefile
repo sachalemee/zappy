@@ -34,6 +34,9 @@ SERVER_SRC = $(addprefix src/server/, \
                 commands/forward.c \
                 commands/left.c \
                 commands/right.c \
+                commands/resource_utils.c   \
+                commands/take.c \
+                commands/set.c \
                 commands/look.c \
                 commands/inventory.c \
                 protocol/protocol.c \
