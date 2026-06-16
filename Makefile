@@ -27,6 +27,7 @@ SERVER_SRC = $(addprefix src/server/, \
                 network/time_utils.c \
                 network/timeout.c \
                 network/famine.c    \
+                network/eggs.c  \
                 team/find_team.c \
                 player/add_player.c \
                 player/create_player.c \
@@ -39,6 +40,8 @@ SERVER_SRC = $(addprefix src/server/, \
                 commands/set.c \
                 commands/look.c \
                 commands/broadcast.c    \
+                commands/incantation.c  \
+                commands/fork.c \
                 commands/inventory.c \
                 protocol/protocol.c \
                 gui/gui_broadcast.c \
