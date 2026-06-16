@@ -11,15 +11,17 @@
 #include "zappy.h"
 
 static const cmd_map_t CMD_TABLE[] = {
-    {"Forward", 7, cmd_forward},
-    {"Right", 7, cmd_right},
-    {"Left", 7, cmd_left},
-    {"Look", 7, cmd_look},
-    {"Inventory", 1, cmd_inventory},
-    {"Take", 7, cmd_take},
-    {"Set", 7, cmd_set},
-    {"Broadcast", 7, cmd_broadcast},
-    {NULL, 0, NULL}
+    {"Forward", 7, NULL, cmd_forward},
+    {"Right", 7, NULL, cmd_right},
+    {"Left", 7, NULL, cmd_left},
+    {"Look", 7, NULL, cmd_look},
+    {"Inventory", 1, NULL, cmd_inventory},
+    {"Take", 7, NULL, cmd_take},
+    {"Set", 7, NULL, cmd_set},
+    {"Broadcast", 7, NULL, cmd_broadcast},
+    {"Incantation", 300, pre_cmd_incantation, cmd_incantation},
+    {"Fork", 42, pre_cmd_fork, cmd_fork},
+    {NULL, 0, NULL, NULL}
 };
 
 static const cmd_map_t *get_cmd(char *cmd_str)
@@ -43,6 +45,13 @@ static void start_command(client_t *c)
         write(c->fd, "ko\n", 3);
         pop_command(c);
         return;
+    }
+    if (cmd->pre_func) {
+        if (cmd->pre_func(c->server, c) == -1) {
+            write(c->fd, "ko\n", 3);
+            pop_command(c);
+            return;
+        }
     }
     c->action_end_time = get_current_time() + 
         get_action_duration(c->server->freq, cmd->time_cost);
