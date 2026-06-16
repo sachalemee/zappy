@@ -38,6 +38,7 @@ SERVER_SRC = $(addprefix src/server/, \
                 commands/take.c \
                 commands/set.c \
                 commands/look.c \
+                commands/broadcast.c    \
                 commands/inventory.c \
                 protocol/protocol.c \
                 gui/gui_broadcast.c \
