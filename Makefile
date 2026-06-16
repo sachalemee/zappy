@@ -48,17 +48,20 @@ SERVER_OBJ 		= $(SERVER_SRC:src/server/%.c=obj/server/%.o)
 SERVER_OBJ_DIR	= obj/server
 
 ## GUI
-GUI_SRC			= $(addprefix src/gui/, \
-					main.cpp \
-					error_handling.cpp \
-					helper.cpp \
-					Window.cpp \
-					menu_gui/Menu.cpp \
-					menu_gui/TextBox.cpp \
-					settings.cpp \
-					network/network_client.cpp \
-					application.cpp \
-				)
+GUI_SRC         = $(addprefix src/gui/, \
+                    main.cpp \
+                    error_handling.cpp \
+                    helper.cpp \
+                    Window.cpp \
+                    menu_gui/Menu.cpp \
+                    menu_gui/TextBox.cpp \
+                    settings.cpp \
+                    network/network_client.cpp \
+                    application.cpp \
+                    gamecamera.cpp \
+                    renderer.cpp \
+                    game/gamestate.cpp \
+                )
 
 GUI_NAME		= zappy_gui
 GUI_OBJ			= $(addprefix obj/gui/, $(notdir $(GUI_SRC:.cpp=.o)))
@@ -125,6 +128,9 @@ obj/gui/TextBox.o:	src/gui/menu_gui/TextBox.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 obj/gui/network_client.o:    src/gui/network/network_client.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/gamestate.o:    src/gui/game/gamestate.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 clean:
