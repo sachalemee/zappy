@@ -83,32 +83,41 @@ typedef struct client_s {
     player_t *player;
 } client_t;
 
+typedef struct egg_s {
+    int id;
+    int player_id;
+    int x;
+    int y;
+    team_t *team;
+    long long hatch_time;
+    int hatched;
+} egg_t;
+
 typedef struct server_s {
     int port;
     int width;
     int height;
     int freq;
     int clients_nb;
-
     int server_fd;
-
     map_t map;
-
     team_t *teams;
     int nb_teams;
-
     player_t **players;
     int nb_players;
-
     client_t **clients;
     int nb_clients;
+    egg_t **eggs;
+    int nb_eggs;
 } server_t;
 
+typedef int (*cmd_pre_func_t)(server_t *, client_t *);
 typedef void (*cmd_func_t)(server_t *, client_t *);
 
 typedef struct cmd_map_s {
     char *name;
     int time_cost;
+    cmd_pre_func_t pre_func;
     cmd_func_t func;
 } cmd_map_t;
 
@@ -145,6 +154,8 @@ void cmd_forward(server_t *s, client_t *c);
 void cmd_right(server_t *s, client_t *c);
 void cmd_left(server_t *s, client_t *c);
 void handle_famine(server_t *s);
+void handle_eggs(server_t *s);
+void gui_event_eht(server_t *s, int egg_id);
 
 //COMMANDE
 
