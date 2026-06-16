@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** *
+** ZAPPY
 ** File description:
 ** create_socket
 */

@@ -18,6 +18,7 @@ static void spawn_resource(server_t *s, resource_t res, float density)
         x = rand() % s->width;
         y = rand() % s->height;
         s->map.tiles[y][x].resources[res]++;
+        gui_send_bct(s, x, y);
     }
 }
 
