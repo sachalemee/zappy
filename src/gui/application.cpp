@@ -37,9 +37,10 @@ void application::updateMenu()
  
 void application::handleLine(const std::string &line)
 {
-    if (_handshakeDone)
+    if (_handshakeDone) {
         std::cout << "[SERVER] " << line << std::endl;
-    else if (line == "WELCOME") {
+        _state.handleLine(line);
+    } else if (line == "WELCOME") {
         _net.sendLine("GRAPHIC\n");
         _handshakeDone = true;
     }
@@ -49,6 +50,8 @@ void application::updateGame()
 {
     for (const std::string &line : _net.poll())
         handleLine(line);
+    _camera.update(50.0f);
+    _renderer.draw(_state, _camera.get());
 }
  
 void application::run()
