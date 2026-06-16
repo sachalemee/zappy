@@ -16,6 +16,8 @@ static const cmd_map_t CMD_TABLE[] = {
     {"Left", 7, cmd_left},
     {"Look", 7, cmd_look},
     {"Inventory", 1, cmd_inventory},
+    {"Take", 7, cmd_take},
+    {"Set", 7, cmd_set},
     {NULL, 0, NULL}
 };
 
@@ -62,26 +64,26 @@ static void finish_command(client_t *c)
 
 void handle_active_commands(server_t *s)
 {
-    for (int i = 0; i < s->nb_clients; i++) {
-        client_t *c = s->clients[i];
+    client_t *c;
+    char *cmd;
 
+    for (int i = 0; i < s->nb_clients; i++) {
+        c = s->clients[i];
         if (!c)
             continue;
         if (c->type == CLIENT_GUI) {
             if (c->nb_cmds <= 0)
                 continue;
-            char *cmd = c->cmds[0];
+            cmd = c->cmds[0];
             if (strncmp(cmd, "mct", 3) == 0 ||
                 strncmp(cmd, "bct", 3) == 0 ||
                 strncmp(cmd, "sgt", 3) == 0) {
                 handle_gui_command(s, c);
-            }
-            else if (strncmp(cmd, "pin", 3) == 0 ||
+            } else if (strncmp(cmd, "pin", 3) == 0 ||
                      strncmp(cmd, "plv", 3) == 0 ||
                      strncmp(cmd, "ppo", 3) == 0) {
                 handle_gui_player_command(s, c);
-            }
-            else {
+            } else {
                 write(c->fd, "suc\n", 4);
             }
             pop_command(c);
