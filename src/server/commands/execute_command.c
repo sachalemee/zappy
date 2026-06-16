@@ -18,6 +18,7 @@ static const cmd_map_t CMD_TABLE[] = {
     {"Inventory", 1, cmd_inventory},
     {"Take", 7, cmd_take},
     {"Set", 7, cmd_set},
+    {"Broadcast", 7, cmd_broadcast},
     {NULL, 0, NULL}
 };
 
