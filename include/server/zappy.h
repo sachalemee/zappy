@@ -148,7 +148,8 @@ void handle_famine(server_t *s);
 
 //COMMANDE
 
-void process_commands(client_t *c);
+void handle_gui_command(server_t *s, client_t *c);
+void handle_gui_player_command(server_t *s, client_t *c);
 
 //TEAM
 
@@ -158,5 +159,29 @@ team_t *find_team(server_t *s, const char *name);
 
 player_t *create_player(server_t *s, team_t *team);
 int add_player(server_t *s, player_t *p);
+
+//GUI
+
+void gui_event_bct(server_t *s, int x, int y);
+void gui_event_mct(server_t *s);
+void gui_event_pnw(server_t *s, player_t *p);
+void gui_event_ppo(server_t *s, player_t *p);
+void gui_event_pin(server_t *s, player_t *p);
+void gui_event_plv(server_t *s, player_t *p);
+void gui_event_pgt(server_t *s, player_t *p, int res);
+void gui_event_pdr(server_t *s, player_t *p, int res);
+void gui_event_pbc(server_t *s, player_t *p, const char *msg);
+void gui_event_pic(server_t *s, player_t *p);
+void gui_event_pie(server_t *s, player_t *p, int result);
+void gui_event_pfk(server_t *s, player_t *p);
+void gui_event_enw(server_t *s, int egg_id, player_t *p);
+void gui_event_edi(server_t *s, int egg_id);
+void gui_event_seg(server_t *s, const char *team);
+
+//PROTOCOL
+
+void gui_send_ppo(server_t *s, player_t *p);
+void gui_send_bct(server_t *s, int x, int y);
+void gui_send_mct(server_t *s);
 
 #endif

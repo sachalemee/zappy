@@ -63,9 +63,33 @@ static void finish_command(client_t *c)
 void handle_active_commands(server_t *s)
 {
     for (int i = 0; i < s->nb_clients; i++) {
-        if (!s->clients[i] || s->clients[i]->state != STATE_IN_GAME)
+        client_t *c = s->clients[i];
+
+        if (!c)
             continue;
-        start_command(s->clients[i]);
-        finish_command(s->clients[i]);
+        if (c->type == CLIENT_GUI) {
+            if (c->nb_cmds <= 0)
+                continue;
+            char *cmd = c->cmds[0];
+            if (strncmp(cmd, "mct", 3) == 0 ||
+                strncmp(cmd, "bct", 3) == 0 ||
+                strncmp(cmd, "sgt", 3) == 0) {
+                handle_gui_command(s, c);
+            }
+            else if (strncmp(cmd, "pin", 3) == 0 ||
+                     strncmp(cmd, "plv", 3) == 0 ||
+                     strncmp(cmd, "ppo", 3) == 0) {
+                handle_gui_player_command(s, c);
+            }
+            else {
+                write(c->fd, "suc\n", 4);
+            }
+            pop_command(c);
+            continue;
+        }
+        if (c->state != STATE_IN_GAME)
+            continue;
+        start_command(c);
+        finish_command(c);
     }
 }

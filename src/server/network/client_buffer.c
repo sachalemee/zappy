@@ -46,7 +46,13 @@ void extract_commands(client_t *c)
         }
         if (nl_pos == -1)
             break;
-        store_raw_cmd(c, nl_pos);
+        if (c->type == CLIENT_GUI) {
+            strncpy(c->cmds[c->nb_cmds], c->buffer, nl_pos);
+            c->cmds[c->nb_cmds][nl_pos] = '\0';
+            c->nb_cmds++;
+        } else {
+            store_raw_cmd(c, nl_pos);
+        }
         shift_buffer(c, nl_pos + 1);
     }
 }

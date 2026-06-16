@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** ZAPPY
+** zappy
 ** File description:
 ** gui_broadcast
 */

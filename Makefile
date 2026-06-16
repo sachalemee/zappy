@@ -26,7 +26,6 @@ SERVER_SRC = $(addprefix src/server/, \
                 network/refill_map.c \
                 network/time_utils.c \
                 network/timeout.c \
-                network/gui_broadcast.c \
                 network/famine.c    \
                 team/find_team.c \
                 player/add_player.c \
@@ -37,6 +36,11 @@ SERVER_SRC = $(addprefix src/server/, \
                 commands/right.c \
                 commands/look.c \
                 commands/inventory.c \
+                protocol/protocol.c \
+                gui/gui_broadcast.c \
+                gui/gui_cmd.c   \
+                gui/gui_event.c \
+                gui/gui_player.c \
             )
 
 SERVER_NAME		= zappy_server

@@ -18,18 +18,30 @@ static void assign_graphic(client_t *c)
 
     c->state = STATE_IN_GAME;
     c->type = CLIENT_GUI;
-    len = snprintf(buf, sizeof(buf), "msz %d %d\nsgt %d\n", 
-        c->server->width, c->server->height, c->server->freq);
+    len = snprintf(buf, sizeof(buf),
+        "msz %d %d\nsgt %d\n",
+        c->server->width,
+        c->server->height,
+        c->server->freq);
     write(c->fd, buf, len);
     for (int i = 0; i < c->server->nb_teams; i++) {
-        len = snprintf(buf, sizeof(buf), "tna %s\n", c->server->teams[i].name);
+        len = snprintf(buf, sizeof(buf),
+            "tna %s\n",
+            c->server->teams[i].name);
         write(c->fd, buf, len);
     }
+    gui_send_mct(c->server);
     for (int i = 0; i < c->server->nb_players; i++) {
         p = c->server->players[i];
-        len = snprintf(buf, sizeof(buf), "pnw %d %d %d %d %d %s\n",
-            p->id, p->x, p->y, p->orientation, p->level, p->team->name);
-        write(c->fd, buf, len);
+        len = snprintf(buf, sizeof(buf),
+            "pnw #%d %d %d %d %d %s\n",
+            p->id,
+            p->x,
+            p->y,
+            p->orientation,
+            p->level,
+            p->team->name);
+        send_to_gui(c->server, buf);
     }
     pop_command(c);
 }
@@ -58,7 +70,7 @@ static void assign_team(client_t *c, team_t *t)
     len = snprintf(buf, sizeof(buf), "%d\n%d %d\n", t->free_slots,
         c->server->width, c->server->height);
     write(c->fd, buf, len);
-    len = snprintf(buf, sizeof(buf), "pnw %d %d %d %d %d %s\n",
+    len = snprintf(buf, sizeof(buf), "pnw #%d %d %d %d %d %s\n",
         c->player->id, c->player->x, c->player->y,
         c->player->orientation, c->player->level, t->name);
     send_to_gui(c->server, buf);
