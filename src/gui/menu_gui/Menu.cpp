@@ -160,6 +160,9 @@ void Menu::handleClicks()
         else if (isMouseOver(_settingsBtn))
             _settings.open();
     }
+    if (!_settings.isOpen() && IsKeyPressed(KEY_ENTER)
+        && !_hostInput.getValue().empty() && !_portInput.getValue().empty())
+        _connectPressed = true;
 }
 
 void Menu::draw()
