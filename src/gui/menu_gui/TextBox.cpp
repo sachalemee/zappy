@@ -31,7 +31,7 @@ void TextBox::update()
 
     int key = GetCharPressed();
     while (key > 0) {
-        if (key >= 32 && key <= 125 && _value.size() < 64)
+        if ((key == '.' || (key >= '0' && key <= '9')) && _value.size() < 12)
             _value += static_cast<char>(key);
         key = GetCharPressed();
     }
