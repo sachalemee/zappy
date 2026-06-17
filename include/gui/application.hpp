@@ -11,7 +11,7 @@
 #include "Window.hpp"
 #include "gamecamera.hpp"
 #include "menu_gui/Menu.hpp"
-#include "network/network_client.hpp"
+#include "network/connection_manager.hpp"
 #include "game/gamestate.hpp"
 #include "renderer.hpp"
 #include <string>
@@ -25,16 +25,14 @@ private:
     void updateMenu();
     void updateGame();
     void connectFromMenu();
-    void handleLine(const std::string &line);
 
     Window _window;
     Menu _menu;
-    network_client _net;
+    connection_manager _connection;
     game_state _state;
     renderer _renderer;
     game_camera _camera;
     bool _inGame = false;
-    bool _handshakeDone = false;
 };
 
 #endif /* APPLICATION_HPP_ */
