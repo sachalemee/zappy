@@ -55,6 +55,17 @@ static void free_clients(server_t *s)
     free(s->clients);
 }
 
+static void free_eggs(server_t *s)
+{
+    if (!s || !s->eggs)
+        return;
+    for (int i = 0; i < s->nb_eggs; i++) {
+        if (s->eggs[i])
+            free(s->eggs[i]);
+    }
+    free(s->eggs);
+}
+
 void destroy_server(server_t *server)
 {
     if (!server)
@@ -65,4 +76,5 @@ void destroy_server(server_t *server)
     free_teams(server->teams);
     free_players(server);
     free_clients(server);
+    free_eggs(server);
 }

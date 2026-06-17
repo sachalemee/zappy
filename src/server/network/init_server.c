@@ -18,6 +18,8 @@ int init_server(server_t *server)
     server->players = NULL;
     server->clients = NULL;
     server->nb_clients = 0;
+    server->eggs = NULL;
+    server->nb_eggs = 0;
     if (init_map(server) == IS_EXIT_FAILURE)
         return IS_EXIT_FAILURE;
     return IS_EXIT_SUCCESS;

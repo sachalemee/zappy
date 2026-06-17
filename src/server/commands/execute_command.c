@@ -11,12 +11,17 @@
 #include "zappy.h"
 
 static const cmd_map_t CMD_TABLE[] = {
-    {"Forward", 7, cmd_forward},
-    {"Right", 7, cmd_right},
-    {"Left", 7, cmd_left},
-    {"Look", 7, cmd_look},
-    {"Inventory", 1, cmd_inventory},
-    {NULL, 0, NULL}
+    {"Forward", 7, NULL, cmd_forward},
+    {"Right", 7, NULL, cmd_right},
+    {"Left", 7, NULL, cmd_left},
+    {"Look", 7, NULL, cmd_look},
+    {"Inventory", 1, NULL, cmd_inventory},
+    {"Take", 7, NULL, cmd_take},
+    {"Set", 7, NULL, cmd_set},
+    {"Broadcast", 7, NULL, cmd_broadcast},
+    {"Incantation", 300, pre_cmd_incantation, cmd_incantation},
+    {"Fork", 42, pre_cmd_fork, cmd_fork},
+    {NULL, 0, NULL, NULL}
 };
 
 static const cmd_map_t *get_cmd(char *cmd_str)
@@ -41,6 +46,13 @@ static void start_command(client_t *c)
         pop_command(c);
         return;
     }
+    if (cmd->pre_func) {
+        if (cmd->pre_func(c->server, c) == -1) {
+            write(c->fd, "ko\n", 3);
+            pop_command(c);
+            return;
+        }
+    }
     c->action_end_time = get_current_time() + 
         get_action_duration(c->server->freq, cmd->time_cost);
 }
@@ -62,26 +74,26 @@ static void finish_command(client_t *c)
 
 void handle_active_commands(server_t *s)
 {
-    for (int i = 0; i < s->nb_clients; i++) {
-        client_t *c = s->clients[i];
+    client_t *c;
+    char *cmd;
 
+    for (int i = 0; i < s->nb_clients; i++) {
+        c = s->clients[i];
         if (!c)
             continue;
         if (c->type == CLIENT_GUI) {
             if (c->nb_cmds <= 0)
                 continue;
-            char *cmd = c->cmds[0];
+            cmd = c->cmds[0];
             if (strncmp(cmd, "mct", 3) == 0 ||
                 strncmp(cmd, "bct", 3) == 0 ||
                 strncmp(cmd, "sgt", 3) == 0) {
                 handle_gui_command(s, c);
-            }
-            else if (strncmp(cmd, "pin", 3) == 0 ||
+            } else if (strncmp(cmd, "pin", 3) == 0 ||
                      strncmp(cmd, "plv", 3) == 0 ||
                      strncmp(cmd, "ppo", 3) == 0) {
                 handle_gui_player_command(s, c);
-            }
-            else {
+            } else {
                 write(c->fd, "suc\n", 4);
             }
             pop_command(c);

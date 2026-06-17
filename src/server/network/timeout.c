@@ -34,5 +34,14 @@ int calculate_timeout(server_t *s)
                 min_delay = delay;
         }
     }
+    for (int i = 0; i < s->nb_eggs; i++) {
+        if (s->eggs[i] && !s->eggs[i]->hatched) {
+            delay = s->eggs[i]->hatch_time - current;
+            if (delay < 0)
+                delay = 0;
+            if (min_delay == -1 || delay < min_delay)
+                min_delay = delay;
+        }
+    }
     return (int)min_delay;
 }

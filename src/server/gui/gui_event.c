@@ -139,3 +139,11 @@ void gui_event_seg(server_t *s, const char *team)
         "seg %s\n", team);
     gui_send(s, buf);
 }
+
+void gui_event_eht(server_t *s, int egg_id)
+{
+    char buf[64];
+
+    snprintf(buf, sizeof(buf), "eht #%d\n", egg_id);
+    send_to_gui(s, buf);
+}
