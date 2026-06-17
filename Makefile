@@ -64,6 +64,7 @@ GUI_SRC         = $(addprefix src/gui/, \
                     menu_gui/TextBox.cpp \
                     settings.cpp \
                     network/network_client.cpp \
+                    network/connection_manager.cpp \
                     application.cpp \
                     gamecamera.cpp \
                     renderer.cpp \
@@ -135,6 +136,9 @@ obj/gui/TextBox.o:	src/gui/menu_gui/TextBox.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 obj/gui/network_client.o:    src/gui/network/network_client.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/connection_manager.o:    src/gui/network/connection_manager.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 obj/gui/gamestate.o:    src/gui/game/gamestate.cpp
