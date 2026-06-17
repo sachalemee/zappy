@@ -6,8 +6,7 @@
 */
 
 #include "application.hpp"
-#include <iostream>
- 
+
 application::application()
     : _window(1920, 1080, "ZAPPY GUI")
 {
@@ -22,34 +21,20 @@ void application::connectFromMenu()
     } catch (const std::exception &) {
         port = 0;
     }
-    if (port > 0 && _net.connectTo(_menu.getHost(), port)) {
+    if (port > 0 && _connection.connect(_menu.getHost(), port))
         _inGame = true;
-        _handshakeDone = false;
-    }
 }
- 
+
 void application::updateMenu()
 {
     _menu.draw();
     if (_menu.isConnectPressed())
         connectFromMenu();
 }
- 
-void application::handleLine(const std::string &line)
-{
-    if (_handshakeDone) {
-        std::cout << "[SERVER] " << line << std::endl;
-        _state.handleLine(line);
-    } else if (line == "WELCOME") {
-        _net.sendLine("GRAPHIC\n");
-        _handshakeDone = true;
-    }
-}
- 
+
 void application::updateGame()
 {
-    for (const std::string &line : _net.poll())
-        handleLine(line);
+    _connection.update(_state);
     _camera.update(50.0f);
     _renderer.draw(_state, _camera.get());
 }
