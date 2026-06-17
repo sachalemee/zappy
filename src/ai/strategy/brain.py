@@ -22,9 +22,15 @@ class Brain:
         self.fsm = FSM()
         self.navigator = Navigator()
         self.next_argument: str | None = None # argument to send alongside the last decided action (ex : resource for take/set)
+        self._check_egg_slots = False # set after a successful Fork, to send Connect_nbr next
 
     def decide(self) -> Action:
         self.next_argument = None
+
+        if self._check_egg_slots:
+            self._check_egg_slots = False
+            return Action.CONNECT_NBR
+
         self.fsm.transition(self.state)
 
         if self.fsm.state == State.INCANTATE:
@@ -67,6 +73,17 @@ class Brain:
             self.state.incoming_call = (level, k)
         return True
 
+    def handle_eject(self, line: str) -> bool:
+        line = line.strip()
+        if not line.startswith("eject:"):
+            return False
+        try:
+            k = int(line.split(":", 1)[1].strip())
+        except ValueError:
+            return False
+        self.state.apply_eject(k)
+        return True
+
     def update(self, action: Action, response: str) -> None:
         response = response.strip()
 
@@ -85,6 +102,13 @@ class Brain:
             self.move_resource(self.next_argument, from_tile=False)
         elif action == Action.INCANTATION and "Current level" in response:
             self.state.level = int(response.rsplit(":", 1)[-1].strip())
+        elif action == Action.FORK and response == "ok":
+            self._check_egg_slots = True
+        elif action == Action.CONNECT_NBR:
+            try:
+                self.state.egg_slots = int(response.strip())
+            except ValueError:
+                pass
 
     def move_resource(self, resource: str, from_tile: bool) -> None:
         tile = self.state.current_tile()
