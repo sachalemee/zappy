@@ -7,14 +7,15 @@
 
 
 class Tile:
-    RESOURCES = ("food",
-                "linemate",
-                "deraumere",
-                "sibur",
-                "mendiane",
-                "phiras",
-                "thystame"
-                )
+    RESOURCES = (
+        "food",
+        "linemate",
+        "deraumere",
+        "sibur",
+        "mendiane",
+        "phiras",
+        "thystame"
+    )
 
     def __init__(self):
         self.resources: dict[str, int] = {name: 0 for name in Tile.RESOURCES}
@@ -22,6 +23,10 @@ class Tile:
 
     @staticmethod
     def from_look_entry(entry: str) -> "Tile":
-        ## entry is one space-separated chunk of a `look` response,
-        ## e.g. "player deraumere" or "" (empty tile) or "thystame"
-        pass
+        tile = Tile()
+        for word in entry.split():
+            if word == "player":
+                tile.players_here += 1
+            elif word in tile.resources:
+                tile.resources[word] += 1
+        return tile

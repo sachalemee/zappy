@@ -6,11 +6,119 @@
 ##
 
 from src.ai.game.state import GameState
+from src.ai.game.tile import Tile
+from src.ai.game.inventory import Inventory
+
 from src.ai.strategy.actions import Action
+
+from src.ai.algo.fsm import FSM, State
+from src.ai.algo.requirements import missing_resources
+from src.ai.algo.navigator import Navigator
+from src.ai.algo.coordinator import Coordinator
 
 class Brain:
     def __init__(self, state: GameState):
         self.state = state
+        self.fsm = FSM()
+        self.navigator = Navigator()
+        self.next_argument: str | None = None # argument to send alongside the last decided action (ex : resource for take/set)
+        self._check_egg_slots = False # set after a successful Fork, to send Connect_nbr next
 
     def decide(self) -> Action:
-        pass
+        self.next_argument = None
+
+        if self._check_egg_slots:
+            self._check_egg_slots = False
+            return Action.CONNECT_NBR
+
+        self.fsm.transition(self.state)
+
+        if self.fsm.state == State.INCANTATE:
+            return Action.INCANTATION
+        if self.fsm.state == State.FORK:
+            return Action.FORK
+        if self.fsm.state == State.BROADCAST:
+            self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+            return Action.BROADCAST
+        if self.fsm.state == State.GATHER:
+            _, k = self.state.incoming_call
+            if k == 0:
+                self.state.incoming_call = None
+            else:
+                return Navigator.move_toward_sound(k)
+
+        tile = self.state.current_tile()
+
+        if self.fsm.state == State.SURVIVE and tile and tile.resources.get("food", 0) > 0:
+            self.next_argument = "food"
+            return Action.TAKE
+
+        if tile:
+            missing = missing_resources(self.state.level, self.state.inventory.items)
+            for resource, amount in missing.items():
+                if amount > 0 and tile.resources.get(resource, 0) > 0:
+                    self.next_argument = resource
+                    return Action.TAKE
+
+        return self.navigator.move_toward_ressource(self.state)
+
+    def handle_broadcast(self, line: str) -> bool:
+        parsed = Coordinator.parse_broadcast_line(line)
+        if parsed is None:
+            return False
+
+        k, text = parsed
+        level = Coordinator.parse_incant_call(self.state.team_name, text)
+        if level is not None and level == self.state.level:
+            self.state.incoming_call = (level, k)
+        return True
+
+    def handle_eject(self, line: str) -> bool:
+        line = line.strip()
+        if not line.startswith("eject:"):
+            return False
+        try:
+            k = int(line.split(":", 1)[1].strip())
+        except ValueError:
+            return False
+        self.state.apply_eject(k)
+        return True
+
+    def update(self, action: Action, response: str) -> None:
+        response = response.strip()
+
+        if action == Action.LOOK and response.startswith("["):
+            entries = response.strip("[]").split(",")
+            self.state.update_vision([Tile.from_look_entry(entry) for entry in entries])
+        elif action == Action.INVENTORY and response.startswith("["):
+            self.state.update_inventory(Inventory.from_response(response))
+        elif action == Action.FORWARD and response == "ok":
+            self.state.apply_move()
+        elif action in (Action.LEFT, Action.RIGHT) and response == "ok":
+            self.state.apply_turn(action)
+        elif action == Action.TAKE and response == "ok" and self.next_argument:
+            self.move_resource(self.next_argument, from_tile=True)
+        elif action == Action.SET and response == "ok" and self.next_argument:
+            self.move_resource(self.next_argument, from_tile=False)
+        elif action == Action.INCANTATION and "Current level" in response:
+            self.state.level = int(response.rsplit(":", 1)[-1].strip())
+        elif action == Action.FORK and response == "ok":
+            self._check_egg_slots = True
+        elif action == Action.CONNECT_NBR:
+            try:
+                self.state.egg_slots = int(response.strip())
+            except ValueError:
+                pass
+
+    def move_resource(self, resource: str, from_tile: bool) -> None:
+        tile = self.state.current_tile()
+        inventory_amount = self.state.inventory.quantity_of(resource)
+
+        if from_tile:
+            self.state.inventory.items[resource] = inventory_amount + 1
+            if tile:
+                tile.resources[resource] = max(0, tile.resources.get(resource, 0) - 1)
+        else:
+            self.state.inventory.items[resource] = max(0, inventory_amount - 1)
+            if tile:
+                tile.resources[resource] = tile.resources.get(resource, 0) + 1
