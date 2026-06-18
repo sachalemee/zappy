@@ -60,7 +60,9 @@ void renderer::drawTileResources(int x, int y, const game_state &state) const
         if (cell.resources[i] <= 0)
             continue;
         Vector3 pos = {static_cast<float>(x), height, static_cast<float>(y)};
-        if (_modelsLoaded[i])
+        if (i == 0)
+            DrawCube(pos, 0.2f, 0.2f, 0.2f, colors[i]);
+        else if (_modelsLoaded[i])
             DrawModel(_models[i], pos, 1.4f, colors[i]);
         else
             DrawCube(pos, 0.2f, 0.2f, 0.2f, colors[i]);
