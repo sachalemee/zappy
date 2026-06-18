@@ -37,6 +37,7 @@ void application::updateGame()
     _connection.update(_state);
     _camera.update(50.0f);
     _renderer.draw(_state, _camera.get());
+    _zoomButtons.draw(_camera);
 }
  
 void application::run()
