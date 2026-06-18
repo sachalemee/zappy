@@ -61,7 +61,7 @@ void renderer::drawTileResources(int x, int y, const game_state &state) const
             continue;
         Vector3 pos = {static_cast<float>(x), height, static_cast<float>(y)};
         if (_modelsLoaded[i])
-            DrawModel(_models[i], pos, 0.35f, colors[i]);
+            DrawModel(_models[i], pos, 1.4f, colors[i]);
         else
             DrawCube(pos, 0.2f, 0.2f, 0.2f, colors[i]);
         height += 0.25f;
