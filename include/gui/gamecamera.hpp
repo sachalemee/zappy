@@ -15,6 +15,8 @@ public:
     game_camera();
     void update(float sensitivity);
     const Camera3D &get() const { return _cam; }
+    void zoomIn();
+    void zoomOut();
 
 private:
     void handleMovement();
