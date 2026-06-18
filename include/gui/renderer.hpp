@@ -13,8 +13,10 @@
  
 class renderer {
 public:
+    renderer();
+    ~renderer();
     void draw(const game_state &state, const Camera3D &cam) const;
- 
+
 private:
     void drawTiles(const game_state &state) const;
     void drawTile(int x, int y) const;
@@ -22,6 +24,9 @@ private:
     void drawTileResources(int x, int y, const game_state &state) const;
     void drawEggs(const game_state &state) const;
     void drawPlayers(const game_state &state) const;
+
+    Model _models[7];
+    bool _modelsLoaded[7];
 };
 
 #endif /* !RENDERER_HPP_ */
