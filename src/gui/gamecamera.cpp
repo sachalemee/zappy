@@ -57,6 +57,20 @@ void game_camera::handleRotation(float sensitivity)
     UpdateCameraPro(&_cam, {0.0f, 0.0f, 0.0f}, look, 0.0f);
 }
 
+void game_camera::zoomIn()
+{
+    _cam.fovy -= 5.0f;
+    if (_cam.fovy < 10.0f)
+        _cam.fovy = 10.0f;
+}
+
+void game_camera::zoomOut()
+{
+    _cam.fovy += 5.0f;
+    if (_cam.fovy > 90.0f)
+        _cam.fovy = 90.0f;
+}
+
 void game_camera::update(float sensitivity)
 {
     if (IsKeyPressed(KEY_X))
