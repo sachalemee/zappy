@@ -7,6 +7,32 @@
 
 #include "renderer.hpp"
 
+renderer::renderer()
+{
+    const char *modelNames[7] = {
+        "models/food.obj",
+        "models/linemate.obj",
+        "models/deraumere.obj",
+        "models/sibur.obj",
+        "models/mendiane.obj",
+        "models/phiras.obj",
+        "models/thystame.obj"
+    };
+
+    for (int i = 0; i < 7; i++) {
+        _models[i] = LoadModel(modelNames[i]);
+        _modelsLoaded[i] = _models[i].meshCount > 0;
+    }
+}
+
+renderer::~renderer()
+{
+    for (int i = 0; i < 7; i++) {
+        if (_modelsLoaded[i])
+            UnloadModel(_models[i]);
+    }
+}
+
 void renderer::drawTile(int x, int y) const
 {
     Vector3 pos = {static_cast<float>(x), 0.0f, static_cast<float>(y)};
@@ -33,8 +59,11 @@ void renderer::drawTileResources(int x, int y, const game_state &state) const
     for (int i = 0; i < 7; i++) {
         if (cell.resources[i] <= 0)
             continue;
-        DrawCube({static_cast<float>(x), height, static_cast<float>(y)},
-            0.2f, 0.2f, 0.2f, colors[i]);
+        Vector3 pos = {static_cast<float>(x), height, static_cast<float>(y)};
+        if (_modelsLoaded[i])
+            DrawModel(_models[i], pos, 0.35f, colors[i]);
+        else
+            DrawCube(pos, 0.2f, 0.2f, 0.2f, colors[i]);
         height += 0.25f;
     }
 }
