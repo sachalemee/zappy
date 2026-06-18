@@ -14,6 +14,7 @@
 #include "network/connection_manager.hpp"
 #include "game/gamestate.hpp"
 #include "renderer.hpp"
+#include "ZoomButtons.hpp"
 #include <string>
 
 class application {
@@ -32,6 +33,7 @@ private:
     game_state _state;
     renderer _renderer;
     game_camera _camera;
+    ZoomButtons _zoomButtons;
     bool _inGame = false;
 };
 
