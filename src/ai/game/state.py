@@ -33,8 +33,8 @@ class GameState:
         self.level = 1
         self.inventory = Inventory()
         self.vision: list[Tile] = []
-        self.incoming_call: tuple[int, int] | None = None # (level, k) of the last incantation call heard (FROM TUNG TUNG SAHUR) from a teammate at our level or none
-        self.egg_slots = 0 # unhatched eggs available to the team, from the last Connect_nbr response
+        self.incoming_call: tuple[int, int] | None = None # last incantation call heard (level, k), if any
+        self.egg_slots = 0 # unhatched eggs available, from last connect_nbr
 
     def update_vision(self, tiles: list[Tile]) -> None:
         self.vision = tiles
