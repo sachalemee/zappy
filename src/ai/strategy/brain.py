@@ -16,6 +16,9 @@ from src.ai.algo.requirements import missing_resources
 from src.ai.algo.navigator import Navigator
 from src.ai.algo.coordinator import Coordinator
 
+BROADCAST_COOLDOWN = 5 # ticks between two incantation call broadcasts
+INVENTORY_POLL_INTERVAL = 20 # ticks between twoiInventory refreshes
+
 class Brain:
     def __init__(self, state: GameState):
         self.state = state
@@ -24,7 +27,9 @@ class Brain:
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
         self._check_egg_slots = False # trigger connect_nbr after a successful fork
         self._incantation_pending = False # an incantation result hasn't come back yet
-    
+        self._broadcast_cooldown = 0
+        self._ticks_since_inventory = INVENTORY_POLL_INTERVAL # force an inventory on the first tick
+
     def decide(self) -> Action:
         self.next_argument = None
 
