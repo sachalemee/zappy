@@ -37,6 +37,11 @@ class Brain:
             self._check_egg_slots = False
             return Action.CONNECT_NBR
 
+        self._ticks_since_inventory += 1
+        if self._ticks_since_inventory >= INVENTORY_POLL_INTERVAL:
+            self._ticks_since_inventory = 0
+            return Action.INVENTORY
+
         self.fsm.transition(self.state)
 
         if self.fsm.state == State.INCANTATE:
@@ -47,8 +52,12 @@ class Brain:
         if self.fsm.state == State.FORK:
             return Action.FORK
         if self.fsm.state == State.BROADCAST:
-            self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
-            return Action.BROADCAST
+            if self._broadcast_cooldown > 0:
+                self._broadcast_cooldown -= 1
+            else:
+                self._broadcast_cooldown = BROADCAST_COOLDOWN
+                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+                return Action.BROADCAST
         if self.fsm.state == State.GATHER:
             _, k = self.state.incoming_call
             if k == 0:
