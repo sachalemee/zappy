@@ -12,17 +12,19 @@ By *Marin Jeunot*(marin.jeunot@epitech.eu), *Evans Ramin*(evans.ramin@epitech.eu
 [ZAPPY Subject](subject/G-YEP-400_zappy.pdf)
 
 ## Features
-- exempli gratia
+- `zappy_server`: game server, single-threaded, poll-based socket handling (**C**)
+- `zappy_gui`: 2D graphical client (**C++**)
+- `zappy_ai`: autonomous AI client (**Python**)
 
 ## Getting Started
 
 ### Prerequisites
 
 This project requires:
-- C++20
-- clang 20.1.8
-
-*SFML ? RAY LIB.*
+- CMake >= 3.16
+- C11 & C++20 toolchain (**Server** & **GUI**)
+- Python 3 (**AI**)
+- raylib (fetched **automatically** by CMake if not found on the system)
 
 ### Installation for Linux
 
@@ -30,26 +32,24 @@ This project requires:
 
 ```sh
 git clone git@github.com:EpitechPGE2-2025/G-YEP-400-PAR-4-1-zappy-11.git
+cd G-YEP-400-PAR-4-1-zappy-11
 ```
 
-2. **Navigate to the project directory:**
+2. **Build the project:**
 
 ```sh
-cd G-YEP-400-PAR-4-1-zappy-11.git
+cmake -B build -S .
+cmake --build build -j$(nproc)
 ```
 
-3. **Build the project:**
+Binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) are produced at the repository root.
+
+3. **Run the binaries:**
 
 ```sh
-Make
-```
-
-4. **Run the zappy:**
-
-*Take a look at * ![ZAPPY server documentation](binaries/README.md)
-
-```sh
-./zappy
+./zappy_server -p 4242 -x 10 -y 10 -n team1 team2 -c 3 -f 100
+./zappy_gui -p 4242 -h localhost
+./zappy_ai -p 4242 -n team1 -h localhost
 ```
 
 ## Repository Architecture
@@ -58,7 +58,8 @@ See the complete repository architecture here : [ZAPPY Project structure](doc/PR
 
 ## Documentation
 
-See the full documentation here : [ZAPPY Documentation](doc/DOCUMENTATION.md)
+- [General documentation](doc/DOCUMENTATION.md)
+- [Server](doc/SERVER_DOCUMENTATION.md) · [GUI](doc/GUI_DOCUMENTATION.md) · [AI](doc/AI_DOCUMENTATION.md)
 
 ## License
 
