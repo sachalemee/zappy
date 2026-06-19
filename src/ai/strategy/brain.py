@@ -21,9 +21,10 @@ class Brain:
         self.state = state
         self.fsm = FSM()
         self.navigator = Navigator()
-        self.next_argument: str | None = None # argument to send alongside the last decided action (ex : resource for take/set)
-        self._check_egg_slots = False # set after a successful Fork, to send Connect_nbr next
-
+        self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
+        self._check_egg_slots = False # trigger connect_nbr after a successful fork
+        self._incantation_pending = False # an incantation result hasn't come back yet
+    
     def decide(self) -> Action:
         self.next_argument = None
 
@@ -34,6 +35,9 @@ class Brain:
         self.fsm.transition(self.state)
 
         if self.fsm.state == State.INCANTATE:
+            if self._incantation_pending:
+                return Action.LOOK # wait for the result instead of resending
+            self._incantation_pending = True
             return Action.INCANTATION
         if self.fsm.state == State.FORK:
             return Action.FORK
@@ -106,8 +110,10 @@ class Brain:
             self.move_resource(self.next_argument, from_tile=True)
         elif action == Action.SET and response == "ok" and self.next_argument:
             self.move_resource(self.next_argument, from_tile=False)
-        elif action == Action.INCANTATION and "Current level" in response:
-            self.state.level = int(response.rsplit(":", 1)[-1].strip())
+        elif action == Action.INCANTATION:
+            self._incantation_pending = False
+            if "Current level" in response:
+                self.state.level = int(response.rsplit(":", 1)[-1].strip())
         elif action == Action.FORK and response == "ok":
             self._check_egg_slots = True
         elif action == Action.CONNECT_NBR:
