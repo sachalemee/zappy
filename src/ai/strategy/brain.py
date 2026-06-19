@@ -54,9 +54,15 @@ class Brain:
             return Action.TAKE
 
         if tile:
-            missing = missing_resources(self.state.level, self.state.inventory.items)
-            for resource, amount in missing.items():
-                if amount > 0 and tile.resources.get(resource, 0) > 0:
+            # incantation needs stones on the ground not in the bag lol
+            tile_missing = missing_resources(self.state.level, tile.resources)
+            for resource, amount in tile_missing.items():
+                if amount > 0 and self.state.inventory.quantity_of(resource) > 0:
+                    self.next_argument = resource
+                    return Action.SET
+
+            for resource, quantity in tile.resources.items():
+                if resource != "food" and quantity > 0:
                     self.next_argument = resource
                     return Action.TAKE
 
