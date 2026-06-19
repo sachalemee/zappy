@@ -10,8 +10,8 @@
 Menu::Menu()
     : _background(LoadTexture("src/gui/menu_gui/img/background.jpg"))
     , _hasBackground(_background.id != 0)
-    , _hostInput(0, 0, 0, 0, "xxx.x.x.x")
-    , _portInput(0, 0, 0, 0, "xxxx")
+    , _hostInput(0, 0, 0, 0, "127.0.0.1")
+    , _portInput(0, 0, 0, 0, "4242")
     , _card{0, 0, 0, 0}
     , _connectBtn{0, 0, 0, 0}
     , _settingsBtn{0, 0, 0, 0}
