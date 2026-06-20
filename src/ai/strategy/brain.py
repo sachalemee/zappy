@@ -12,7 +12,7 @@ from src.ai.game.inventory import Inventory
 from src.ai.strategy.actions import Action
 
 from src.ai.algo.fsm import FSM, State
-from src.ai.algo.requirements import missing_resources
+from src.ai.algo.requirements import INCANTATION_REQUIREMENTS, missing_resources
 from src.ai.algo.navigator import Navigator
 from src.ai.algo.coordinator import Coordinator
 
@@ -75,20 +75,25 @@ class Brain:
 
         tile = self.state.current_tile()
 
-        if self.fsm.state == State.SURVIVE and tile and tile.resources.get("food", 0) > 0:
-            self.next_argument = "food"
-            return Action.TAKE
+        if self.fsm.state == State.SURVIVE:
+            if tile and tile.resources.get("food", 0) > 0:
+                self.next_argument = "food"
+                return Action.TAKE
+            return self.navigator.move_toward_ressource(self.state)
 
         if tile:
-            # incantation needs stones on the ground not in the bag lol
+            # incantation needs stones on the ground, not in the bag
             tile_missing = missing_resources(self.state.level, tile.resources)
             for resource, amount in tile_missing.items():
                 if amount > 0 and self.state.inventory.quantity_of(resource) > 0:
                     self.next_argument = resource
                     return Action.SET
 
+            # only take what's in excess of this tile's own incantation requirement,
+            # otherwise we'd take/set the same stone back and forth forever
+            required_here = INCANTATION_REQUIREMENTS.get(self.state.level, {})
             for resource, quantity in tile.resources.items():
-                if resource != "food" and quantity > 0:
+                if resource != "food" and quantity > required_here.get(resource, 0):
                     self.next_argument = resource
                     return Action.TAKE
 
