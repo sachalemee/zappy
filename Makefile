@@ -42,6 +42,8 @@ SERVER_SRC = $(addprefix src/server/, \
                 commands/broadcast.c    \
                 commands/incantation.c  \
                 commands/fork.c \
+                commands/connect_nbr.c  \
+                commands/eject.c    \
                 commands/inventory.c \
                 protocol/protocol.c \
                 gui/gui_broadcast.c \

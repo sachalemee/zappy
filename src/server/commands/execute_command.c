@@ -19,6 +19,8 @@ static const cmd_map_t CMD_TABLE[] = {
     {"Take", 7, NULL, cmd_take},
     {"Set", 7, NULL, cmd_set},
     {"Broadcast", 7, NULL, cmd_broadcast},
+    {"Connect_nbr", 0, NULL, cmd_connect_nbr},
+    {"Eject", 7, NULL, cmd_eject},
     {"Incantation", 300, pre_cmd_incantation, cmd_incantation},
     {"Fork", 42, pre_cmd_fork, cmd_fork},
     {NULL, 0, NULL, NULL}
