@@ -21,6 +21,7 @@ public:
 private:
     void handleMovement();
     void handleRotation(float sensitivity);
+    void handleWheelZoom();
     void toggleLock();
 
     Camera3D _cam;
