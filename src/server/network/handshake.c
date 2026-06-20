@@ -10,6 +10,13 @@
 #include <unistd.h>
 #include "zappy.h"
 
+static void reject_client(client_t *c)
+{
+    if (c->fd >= 0)
+        close(c->fd);
+    c->fd = -1;
+}
+
 static void assign_graphic(client_t *c)
 {
     char buf[256];
@@ -18,29 +25,18 @@ static void assign_graphic(client_t *c)
 
     c->state = STATE_IN_GAME;
     c->type = CLIENT_GUI;
-    len = snprintf(buf, sizeof(buf),
-        "msz %d %d\nsgt %d\n",
-        c->server->width,
-        c->server->height,
-        c->server->freq);
+    len = snprintf(buf, sizeof(buf), "msz %d %d\nsgt %d\n",
+        c->server->width, c->server->height, c->server->freq);
     write(c->fd, buf, len);
     for (int i = 0; i < c->server->nb_teams; i++) {
-        len = snprintf(buf, sizeof(buf),
-            "tna %s\n",
-            c->server->teams[i].name);
+        len = snprintf(buf, sizeof(buf), "tna %s\n", c->server->teams[i].name);
         write(c->fd, buf, len);
     }
     gui_send_mct(c->server);
     for (int i = 0; i < c->server->nb_players; i++) {
         p = c->server->players[i];
-        len = snprintf(buf, sizeof(buf),
-            "pnw #%d %d %d %d %d %s\n",
-            p->id,
-            p->x,
-            p->y,
-            p->orientation,
-            p->level,
-            p->team->name);
+        len = snprintf(buf, sizeof(buf), "pnw #%d %d %d %d %d %s\n",
+            p->id, p->x, p->y, p->orientation, p->level, p->team->name);
         send_to_gui(c->server, buf);
     }
     pop_command(c);
@@ -52,7 +48,7 @@ static void assign_team(client_t *c, team_t *t)
     int len;
 
     if (t->free_slots <= 0) {
-        c->fd = -1;
+        reject_client(c);
         return;
     }
     t->free_slots--;
@@ -60,7 +56,7 @@ static void assign_team(client_t *c, team_t *t)
     c->state = STATE_IN_GAME;
     c->player = create_player(c->server, t);
     if (!c->player) {
-        c->fd = -1;
+        reject_client(c);
         return;
     }
     c->player->fd = c->fd;
@@ -91,5 +87,5 @@ void handle_handshake(client_t *c)
             return;
         }
     }
-    c->fd = -1;
+    reject_client(c);
 }
