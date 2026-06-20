@@ -109,6 +109,7 @@ typedef struct server_s {
     int nb_clients;
     egg_t **eggs;
     int nb_eggs;
+    long long next_refill_time;
 } server_t;
 
 typedef int (*cmd_pre_func_t)(server_t *, client_t *);
