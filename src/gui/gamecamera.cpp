@@ -71,10 +71,21 @@ void game_camera::zoomOut()
         _cam.fovy = 90.0f;
 }
 
+void game_camera::handleWheelZoom()
+{
+    float wheel = GetMouseWheelMove();
+
+    if (wheel > 0.0f)
+        zoomIn();
+    else if (wheel < 0.0f)
+        zoomOut();
+}
+
 void game_camera::update(float sensitivity)
 {
     if (IsKeyPressed(KEY_X))
         toggleLock();
     handleMovement();
     handleRotation(sensitivity);
+    handleWheelZoom();
 }

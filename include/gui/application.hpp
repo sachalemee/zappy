@@ -15,6 +15,8 @@
 #include "game/gamestate.hpp"
 #include "renderer.hpp"
 #include "ZoomButtons.hpp"
+#include "SettingsButton.hpp"
+#include "settings.hpp"
 #include <string>
 
 class application {
@@ -34,6 +36,8 @@ private:
     renderer _renderer;
     game_camera _camera;
     ZoomButtons _zoomButtons;
+    SettingsButton _settingsButton;
+    Settings _settings;
     bool _inGame = false;
 };
 
