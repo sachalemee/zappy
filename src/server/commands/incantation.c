@@ -28,7 +28,7 @@ static int check_stones(server_t *s, player_t *p)
     tile_t *t = &s->map.tiles[p->y][p->x];
 
     for (int i = 1; i < RESOURCE_MAX; i++) {
-        if (t->resources[i] != REQ[lvl][i])
+        if (t->resources[i] < REQ[lvl][i])
             return -1;
     }
     return 0;
