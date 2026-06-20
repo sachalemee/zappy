@@ -17,7 +17,8 @@ from src.ai.algo.navigator import Navigator
 from src.ai.algo.coordinator import Coordinator
 
 BROADCAST_COOLDOWN = 5 # ticks between two incantation call broadcasts
-INVENTORY_POLL_INTERVAL = 20 # ticks between twoiInventory refreshes
+INVENTORY_POLL_INTERVAL = 20 # ticks between two Inventory refreshes
+LOOK_POLL_INTERVAL = 5 # ticks between two Look refreshes while stationary
 
 class Brain:
     def __init__(self, state: GameState):
@@ -29,6 +30,7 @@ class Brain:
         self._incantation_pending = False # an incantation result hasn't come back yet
         self._broadcast_cooldown = 0
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL # force an inventory on the first tick
+        self._ticks_since_look = LOOK_POLL_INTERVAL # force a look on the first tick
 
     def decide(self) -> Action:
         self.next_argument = None
@@ -37,7 +39,13 @@ class Brain:
             self._check_egg_slots = False
             return Action.CONNECT_NBR
 
+        self._ticks_since_look += 1
         self._ticks_since_inventory += 1
+
+        if self._ticks_since_look >= LOOK_POLL_INTERVAL:
+            self._ticks_since_look = 0
+            return Action.LOOK
+
         if self._ticks_since_inventory >= INVENTORY_POLL_INTERVAL:
             self._ticks_since_inventory = 0
             return Action.INVENTORY
@@ -118,6 +126,7 @@ class Brain:
             self.state.update_inventory(Inventory.from_response(response))
         elif action == Action.FORWARD and response == "ok":
             self.state.apply_move()
+            self._ticks_since_look = LOOK_POLL_INTERVAL # tile changed, look again next tick
         elif action in (Action.LEFT, Action.RIGHT) and response == "ok":
             self.state.apply_turn(action)
         elif action == Action.TAKE and response == "ok" and self.next_argument:
