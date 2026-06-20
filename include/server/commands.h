@@ -23,5 +23,7 @@ int pre_cmd_incantation(server_t *s, client_t *c);
 void cmd_incantation(server_t *s, client_t *c);
 int pre_cmd_fork(server_t *s, client_t *c);
 void cmd_fork(server_t *s, client_t *c);
+void cmd_connect_nbr(server_t *s, client_t *c);
+void cmd_eject(server_t *s, client_t *c);
 
 #endif
