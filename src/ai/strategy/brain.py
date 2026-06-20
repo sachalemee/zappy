@@ -50,7 +50,7 @@ class Brain:
             self._ticks_since_inventory = 0
             return Action.INVENTORY
 
-        self.fsm.transition(self.state)
+        self.fsm.transition(self.state) # pick the priority state for this tick
 
         if self.fsm.state == State.INCANTATE:
             if self._incantation_pending:

@@ -52,6 +52,7 @@ class FSM:
         return True
 
     def transition(self, game_state) -> None:
+        # priority order : survive first, then elevate, then grow, then explore
         if game_state.inventory.quantity_of("food") < SURVIVAL_THRESHOLD:
             self.state = State.SURVIVE
             return
@@ -61,12 +62,12 @@ class FSM:
         players_ready = tile is not None and has_enough_players(game_state.level, tile.players_here)
 
         if resources_ready and players_ready:
-            self.state = State.INCANTATE
+            self.state = State.INCANTATE # everything is here, level up now
         elif resources_ready and not players_ready:
-            self.state = State.BROADCAST
+            self.state = State.BROADCAST # call for help
         elif game_state.incoming_call is not None and game_state.incoming_call[0] == game_state.level:
-            self.state = State.GATHER
+            self.state = State.GATHER # a teammate is calling
         elif self.has_fork_surplus(game_state):
-            self.state = State.FORK
+            self.state = State.FORK # enough surplus, grow the team
         else:
-            self.state = State.COLLECT
+            self.state = State.COLLECT # default : explore and gather

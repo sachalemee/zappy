@@ -33,7 +33,8 @@ def main(argv: list[str] = sys.argv) -> None:
     brain = Brain(state)
 
     while True:
-        if protocol.can_send():
+        # one command in flight at a time : brain reacts to the latest known state, so queuing more before a response comes back would make it repeat stale decisions (e.g. turning multiple times for one right)
+        if not protocol.pending:
             action = brain.decide()
             protocol.send_command(action, brain.next_argument)
 
