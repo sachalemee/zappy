@@ -106,6 +106,11 @@ int run_server(server_t *s)
         handle_famine(s);
         handle_eggs(s);
         handle_active_commands(s);
+        if (get_current_time() >= s->next_refill_time) {
+            refill_map(s);
+            s->next_refill_time =
+                get_current_time() + get_action_duration(s->freq, 20);
+        }
         nfds = build_poll_fds(s, fds);
         timeout = calculate_timeout(s);
         if (poll(fds, nfds, timeout) < 0) {
