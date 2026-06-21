@@ -208,5 +208,7 @@ void gui_send_mct(server_t *s);
 //EGG
 
 egg_t *spawn_egg(server_t *s, client_t *c);
+void gui_event_pex(server_t *s, int player_id);
+void destroy_egg(server_t *s, int egg_id);
 
 #endif
