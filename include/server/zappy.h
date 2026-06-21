@@ -197,4 +197,8 @@ void gui_send_ppo(server_t *s, player_t *p);
 void gui_send_bct(server_t *s, int x, int y);
 void gui_send_mct(server_t *s);
 
+//EGG
+
+egg_t *spawn_egg(server_t *s, client_t *c);
+
 #endif
