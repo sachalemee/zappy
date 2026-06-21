@@ -103,6 +103,8 @@ int run_server(server_t *s)
     signal(SIGINT, sigint_handler);
     printf("Server running...\n");
     while (server_is_running) {
+        if (check_win(s))
+            break;
         handle_famine(s);
         handle_eggs(s);
         handle_active_commands(s);
