@@ -111,6 +111,7 @@ typedef struct server_s {
     int nb_eggs;
     long long next_refill_time;
     int next_egg_id;
+    int next_player_id;
 } server_t;
 
 typedef int (*cmd_pre_func_t)(server_t *, client_t *);
@@ -158,6 +159,7 @@ void cmd_left(server_t *s, client_t *c);
 void handle_famine(server_t *s);
 void handle_eggs(server_t *s);
 void gui_event_eht(server_t *s, int egg_id);
+void consume_egg(server_t *s, team_t *t, player_t *p);
 
 //COMMANDE
 
@@ -190,6 +192,7 @@ void gui_event_pfk(server_t *s, player_t *p);
 void gui_event_enw(server_t *s, int egg_id, player_t *p);
 void gui_event_edi(server_t *s, int egg_id);
 void gui_event_seg(server_t *s, const char *team);
+void gui_event_ebo(server_t *s, int egg_id);
 
 //PROTOCOL
 
