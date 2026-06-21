@@ -28,6 +28,7 @@ SERVER_SRC = $(addprefix src/server/, \
                 network/timeout.c \
                 network/famine.c    \
                 network/eggs.c  \
+                network/win.c   \
                 team/find_team.c \
                 player/add_player.c \
                 player/create_player.c \

@@ -91,6 +91,7 @@ typedef struct egg_s {
     team_t *team;
     long long hatch_time;
     int hatched;
+    long long death_time;
 } egg_t;
 
 typedef struct server_s {
@@ -160,6 +161,9 @@ void handle_famine(server_t *s);
 void handle_eggs(server_t *s);
 void gui_event_eht(server_t *s, int egg_id);
 void consume_egg(server_t *s, team_t *t, player_t *p);
+int check_win(server_t *s);
+void generate_initial_eggs(server_t *s);
+void gui_send_initial_data(server_t *s, int fd);
 
 //COMMANDE
 
@@ -194,6 +198,7 @@ void gui_event_edi(server_t *s, int egg_id);
 void gui_event_seg(server_t *s, const char *team);
 void gui_event_ebo(server_t *s, int egg_id);
 
+
 //PROTOCOL
 
 void gui_send_ppo(server_t *s, player_t *p);
@@ -203,5 +208,7 @@ void gui_send_mct(server_t *s);
 //EGG
 
 egg_t *spawn_egg(server_t *s, client_t *c);
+void gui_event_pex(server_t *s, int player_id);
+void destroy_egg(server_t *s, int egg_id);
 
 #endif

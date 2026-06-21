@@ -25,5 +25,6 @@ int init_server(server_t *server)
     server->next_egg_id = 0;
     if (init_map(server) == IS_EXIT_FAILURE)
         return IS_EXIT_FAILURE;
+    generate_initial_eggs(server);
     return IS_EXIT_SUCCESS;
 }

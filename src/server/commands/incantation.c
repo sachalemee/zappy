@@ -53,15 +53,24 @@ static int count_players(server_t *s, player_t *p)
 int pre_cmd_incantation(server_t *s, client_t *c)
 {
     player_t *p = c->player;
+    client_t *o;
 
-    if (!p || p->level >= 8)
+    if (!p || p->level >= 8 || check_stones(s, p) == -1)
         return -1;
     if (count_players(s, p) != P_REQ[p->level - 1])
         return -1;
-    if (check_stones(s, p) == -1)
-        return -1;
     gui_event_pic(s, p);
-    write(c->fd, "Elevation underway\n", 19);
+    for (int i = 0; i < s->nb_clients; i++) {
+        o = s->clients[i];
+        if (o && o->type == CLIENT_AI && o->player &&
+            o->player->x == p->x && o->player->y == p->y &&
+            o->player->level == p->level) {
+            write(o->fd, "Elevation underway\n", 19);
+            if (o != c)
+                o->action_end_time = get_current_time() +
+                    get_action_duration(s->freq, 300);
+        }
+    }
     return 0;
 }
 
