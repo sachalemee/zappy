@@ -8,13 +8,29 @@
 #include <stdlib.h>
 #include "zappy.h"
 
+static int count_resource(server_t *s, resource_t res)
+{
+    int total = 0;
+
+    for (int y = 0; y < s->height; y++) {
+        for (int x = 0; x < s->width; x++) {
+            total += s->map.tiles[y][x].resources[res];
+        }
+    }
+    return total;
+}
+
 static void spawn_resource(server_t *s, resource_t res, float density)
 {
-    int total = (int)(s->width * s->height * density);
-    int x;
-    int y;
+    int target = (int)(s->width * s->height * density);
+    int current = count_resource(s, res);
+    int missing = target - current;
+    int x = 0;
+    int y = 0;
 
-    for (int i = 0; i < total; i++) {
+    if (missing <= 0)
+        return;
+    for (int i = 0; i < missing; i++) {
         x = rand() % s->width;
         y = rand() % s->height;
         s->map.tiles[y][x].resources[res]++;
