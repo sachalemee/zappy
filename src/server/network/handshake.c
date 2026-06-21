@@ -42,11 +42,23 @@ static void assign_graphic(client_t *c)
     pop_command(c);
 }
 
-static void assign_team(client_t *c, team_t *t)
+static void finalize_connection(client_t *c, team_t *t)
 {
     char buf[128];
     int len;
 
+    len = snprintf(buf, sizeof(buf), "%d\n%d %d\n", t->free_slots,
+        c->server->width, c->server->height);
+    write(c->fd, buf, len);
+    len = snprintf(buf, sizeof(buf), "pnw #%d %d %d %d %d %s\n",
+        c->player->id, c->player->x, c->player->y,
+        c->player->orientation, c->player->level, t->name);
+    send_to_gui(c->server, buf);
+    pop_command(c);
+}
+
+static void assign_team(client_t *c, team_t *t)
+{
     if (t->free_slots <= 0) {
         reject_client(c);
         return;
@@ -59,18 +71,12 @@ static void assign_team(client_t *c, team_t *t)
         reject_client(c);
         return;
     }
+    consume_egg(c->server, t, c->player);
     c->player->fd = c->fd;
     c->player->next_meal_time = get_current_time() + 
         get_action_duration(c->server->freq, 126);
     add_player(c->server, c->player);
-    len = snprintf(buf, sizeof(buf), "%d\n%d %d\n", t->free_slots,
-        c->server->width, c->server->height);
-    write(c->fd, buf, len);
-    len = snprintf(buf, sizeof(buf), "pnw #%d %d %d %d %d %s\n",
-        c->player->id, c->player->x, c->player->y,
-        c->player->orientation, c->player->level, t->name);
-    send_to_gui(c->server, buf);
-    pop_command(c);
+    finalize_connection(c, t);
 }
 
 void handle_handshake(client_t *c)
