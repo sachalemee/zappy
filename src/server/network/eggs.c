@@ -102,3 +102,23 @@ void generate_initial_eggs(server_t *s)
         }
     }
 }
+
+void destroy_egg(server_t *s, int egg_id)
+{
+    egg_t *e;
+
+    for (int i = 0; i < s->nb_eggs; i++) {
+        e = s->eggs[i];
+        if (e && e->id == egg_id) {
+            gui_event_edi(s, e->id);
+            if (e->team && e->team->free_slots > 0)
+                e->team->free_slots--;
+            free(e);
+            for (int j = i; j < s->nb_eggs - 1; j++)
+                s->eggs[j] = s->eggs[j + 1];
+            s->eggs[s->nb_eggs - 1] = NULL;
+            s->nb_eggs--;
+            return;
+        }
+    }
+}

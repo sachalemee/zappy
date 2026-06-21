@@ -28,6 +28,7 @@ static int handle_map_cmd(server_t *s, client_t *c, char *cmd)
     int x = -1;
     int y = -1;
 
+    (void)c;
     if (strncmp(cmd, "mct", 3) == 0) {
         gui_send_mct(s);
         return 1;
