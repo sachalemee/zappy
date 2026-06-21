@@ -21,38 +21,51 @@ static void move_player(server_t *s, player_t *p, int dir)
     gui_event_ppo(s, p);
 }
 
-void cmd_eject(server_t *s, client_t *c)
+static int push_players(server_t *s, player_t *p)
 {
-    player_t *p = c->player;
     int pushed = 0;
+    client_t *o;
 
-    if (!p) {
-        write(c->fd, "ko\n", 3);
-        return;
-    }
     for (int i = 0; i < s->nb_clients; i++) {
-        client_t *o = s->clients[i];
-        if (!o || o->type != CLIENT_AI || !o->player)
+        o = s->clients[i];
+        if (!o || o->type != CLIENT_AI || !o->player || o->player == p)
             continue;
-        if (o->player == p)
-            continue;
-        if (o->player->x == p->x &&
-            o->player->y == p->y) {
+        if (o->player->x == p->x && o->player->y == p->y) {
             move_player(s, o->player, p->orientation);
             write(o->fd, "eject: 1\n", 9);
             pushed++;
         }
     }
+    return pushed;
+}
+
+static void destroy_eggs_on_tile(server_t *s, player_t *p)
+{
+    egg_t *e;
+
     for (int i = 0; i < s->nb_eggs; i++) {
-        egg_t *e = s->eggs[i];
-        if (e && !e->hatched &&
-            e->x == p->x && e->y == p->y) {
-            e->hatched = 1;
-            gui_event_edi(s, e->id);
+        e = s->eggs[i];
+        if (e && e->x == p->x && e->y == p->y) {
+            destroy_egg(s, e->id);
+            i--;
         }
     }
-    if (pushed > 0)
-        write(c->fd, "ok\n", 3);
-    else
+}
+
+void cmd_eject(server_t *s, client_t *c)
+{
+    int pushed;
+
+    if (!c->player) {
         write(c->fd, "ko\n", 3);
+        return;
+    }
+    pushed = push_players(s, c->player);
+    destroy_eggs_on_tile(s, c->player);
+    if (pushed > 0) {
+        gui_event_pex(s, c->player->id);
+        write(c->fd, "ok\n", 3);
+    } else {
+        write(c->fd, "ko\n", 3);
+    }
 }
