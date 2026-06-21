@@ -47,3 +47,23 @@ void handle_eggs(server_t *s)
         }
     }
 }
+
+void consume_egg(server_t *s, team_t *t, player_t *p)
+{
+    egg_t *e;
+
+    for (int i = 0; i < s->nb_eggs; i++) {
+        e = s->eggs[i];
+        if (e && e->team == t && e->hatched) {
+            p->x = e->x;
+            p->y = e->y;
+            gui_event_ebo(s, e->id);
+            free(e);
+            for (int j = i; j < s->nb_eggs - 1; j++)
+                s->eggs[j] = s->eggs[j + 1];
+            s->eggs[s->nb_eggs - 1] = NULL;
+            s->nb_eggs--;
+            return;
+        }
+    }
+}
