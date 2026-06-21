@@ -21,7 +21,7 @@ player_t *create_player(server_t *s, team_t *team)
     if (!p)
         return NULL;
     memset(p, 0, sizeof(player_t));
-    p->id = s->nb_players + 1;
+    p->id = s->next_player_id++;
     p->x = rand() % s->width;
     p->y = rand() % s->height;
     p->orientation = random_orientation();
