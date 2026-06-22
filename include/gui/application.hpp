@@ -17,6 +17,7 @@
 #include "ZoomButtons.hpp"
 #include "SettingsButton.hpp"
 #include "settings.hpp"
+#include "TeamList.hpp"
 #include <string>
 
 class application {
@@ -38,6 +39,7 @@ private:
     ZoomButtons _zoomButtons;
     SettingsButton _settingsButton;
     Settings _settings;
+    TeamList _teamList;
     bool _inGame = false;
 };
 
