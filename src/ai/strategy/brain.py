@@ -28,6 +28,7 @@ class Brain:
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
         self._incantation_pending = False
         self._depositing = False # once the bag has everything needed, stay in deposit mode until the ground does too (avoids take/set flip-flopping on the same stone)
+        self._last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
         self._broadcast_cooldown = 0
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
         self._ticks_since_look = LOOK_POLL_INTERVAL
@@ -64,15 +65,22 @@ class Brain:
         if self.fsm.state == State.BROADCAST:
             if self._broadcast_cooldown > 0:
                 self._broadcast_cooldown -= 1
-            else:
-                self._broadcast_cooldown = BROADCAST_COOLDOWN
-                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
-                return Action.BROADCAST
+                return Action.LOOK # stay put and wait for the cooldown ; falling through would
+                                   # re-take the stones we just deposited here for the call
+            self._broadcast_cooldown = BROADCAST_COOLDOWN
+            self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+            return Action.BROADCAST
         if self.fsm.state == State.GATHER:
             _, k = self.state.incoming_call
             if k == 0:
                 self.state.incoming_call = None
+                self._last_gather_k = None
+            elif k == self._last_gather_k:
+                # no fresh broadcast since we turned for this k ; advance instead of
+                # re-issuing the same turn every tick (that would just spin in place)
+                return Action.FORWARD
             else:
+                self._last_gather_k = k
                 return Navigator.move_toward_sound(k)
 
         if self.fsm.state == State.SURVIVE:
@@ -96,11 +104,15 @@ class Brain:
                         return Action.SET
                 self._depositing = False # nothing left to drop here, free to gather again
             else:
-                # only take what's in excess of this tile's own incantation requirement,
-                # otherwise we'd take/set the same stone back and forth forever
+                # gather up to what incantation needs (at least 1 of each, even past the
+                # requirement, so a fork-worthy stockpile can build up too) ; safe from
+                # flip-flopping with Set since we only get here while _depositing is False
                 required_here = INCANTATION_REQUIREMENTS.get(self.state.level, {})
                 for resource, quantity in tile.resources.items():
-                    if resource != "food" and quantity > required_here.get(resource, 0):
+                    if resource == "food":
+                        continue
+                    target = max(required_here.get(resource, 0), 1)
+                    if quantity > 0 and self.state.inventory.quantity_of(resource) < target:
                         self.next_argument = resource
                         return Action.TAKE
 
