@@ -17,6 +17,7 @@ from src.ai.algo.navigator import Navigator
 from src.ai.algo.coordinator import Coordinator
 
 BROADCAST_COOLDOWN = 5 # ticks between two incantation call broadcasts
+BROADCAST_GIVEUP_LIMIT = 5 # consecutive unanswered calls before abandoning this spot
 INVENTORY_POLL_INTERVAL = 20 # ticks between two Inventory refreshes
 LOOK_POLL_INTERVAL = 5 # ticks between two Look refreshes while stationary
 
@@ -31,6 +32,7 @@ class Brain:
         self._last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
         self._broadcast_cooldown = 0
         self._broadcast_attempts = 0 # consecutive Broadcasts sent with nobody showing up
+        self._just_gave_up = False # reclaimed our stones after giving up ; walk away before trying this spot again
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
         self._ticks_since_look = LOOK_POLL_INTERVAL
 
@@ -67,14 +69,21 @@ class Brain:
         if self.fsm.state == State.FORK:
             return Action.FORK # lays an egg, adds one free slot to the team
         if self.fsm.state == State.BROADCAST:
-            if self._broadcast_cooldown > 0:
+            if self._broadcast_attempts >= BROADCAST_GIVEUP_LIMIT:
+                # nobody's coming ; give up on this spot and fall through to the gather
+                # logic below, which will pick our own dropped stones back up since
+                # they're sitting right here and our bag is short of them again
+                self._broadcast_attempts = 0
+                self._just_gave_up = True
+            elif self._broadcast_cooldown > 0:
                 self._broadcast_cooldown -= 1
                 return Action.LOOK # stay put and wait for the cooldown ; falling through would
                                    # re-take the stones we just deposited here for the call
-            self._broadcast_cooldown = BROADCAST_COOLDOWN
-            self._broadcast_attempts += 1
-            self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
-            return Action.BROADCAST
+            else:
+                self._broadcast_cooldown = BROADCAST_COOLDOWN
+                self._broadcast_attempts += 1
+                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+                return Action.BROADCAST
         if self.fsm.state == State.GATHER:
             _, k = self.state.incoming_call
             if k == 0:
@@ -96,7 +105,15 @@ class Brain:
 
         if tile:
             bag_missing = missing_resources(self.state.level, self.state.inventory.items)
-            if not self._depositing and not any(amount > 0 for amount in bag_missing.values()):
+            bag_complete = not any(amount > 0 for amount in bag_missing.values())
+
+            if bag_complete and self._just_gave_up:
+                # just reclaimed everything we'd dropped here ; move on before retrying,
+                # or we'd immediately deposit the same stones on this same spot again
+                self._just_gave_up = False
+                return self.navigator.move_toward_ressource(self.state)
+
+            if not self._depositing and bag_complete:
                 self._depositing = True # bag is fully stocked for this level, commit to dropping it here
 
             if self._depositing:
