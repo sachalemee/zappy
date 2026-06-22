@@ -35,9 +35,12 @@ void application::updateMenu()
 void application::updateGame()
 {
     _connection.update(_state);
-    _camera.update(50.0f);
+    if (!_settings.isOpen())
+        _camera.update(50.0f);
     _renderer.draw(_state, _camera.get());
     _zoomButtons.draw(_camera);
+    _settingsButton.draw(_settings);
+    _settings.draw();
 }
  
 void application::run()

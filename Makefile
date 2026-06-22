@@ -28,6 +28,7 @@ SERVER_SRC = $(addprefix src/server/, \
                 network/timeout.c \
                 network/famine.c    \
                 network/eggs.c  \
+                network/win.c   \
                 team/find_team.c \
                 player/add_player.c \
                 player/create_player.c \
@@ -42,6 +43,8 @@ SERVER_SRC = $(addprefix src/server/, \
                 commands/broadcast.c    \
                 commands/incantation.c  \
                 commands/fork.c \
+                commands/connect_nbr.c  \
+                commands/eject.c    \
                 commands/inventory.c \
                 protocol/protocol.c \
                 gui/gui_broadcast.c \
@@ -68,6 +71,7 @@ GUI_SRC         = $(addprefix src/gui/, \
                     application.cpp \
                     gamecamera.cpp \
                     ZoomButtons.cpp \
+                    SettingsButton.cpp \
                     renderer.cpp \
                     game/gamestate.cpp \
                 )

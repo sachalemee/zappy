@@ -142,7 +142,7 @@ void renderer::drawResource(int i, Vector3 pos) const
         break;
     case 2:
         if (_beanModel.meshCount > 0)
-            DrawModelEx(_beanModel, pos, {1.0f, 0.0f, 0.0f}, 180.0f,
+            DrawModelEx(_beanModel, pos, {1.0f, 0.0f, 0.0f}, 0.0f,
                 {0.05f, 0.05f, 0.05f}, BROWN);
         else
             DrawCube(pos, 0.2f, 0.2f, 0.2f, fallback[i]);
@@ -210,7 +210,7 @@ void renderer::drawResources(const game_state &state) const
 void renderer::drawEggs(const game_state &state) const
 {
     for (const Egg &egg : state.eggs()) {
-        Vector3 pos = {static_cast<float>(egg.x), 0.15f,
+        Vector3 pos = {static_cast<float>(egg.x), 0.45f,
             static_cast<float>(egg.y)};
         if (_eggModel.meshCount > 0)
             DrawModel(_eggModel, pos, 0.05f, WHITE);

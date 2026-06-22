@@ -147,3 +147,19 @@ void gui_event_eht(server_t *s, int egg_id)
     snprintf(buf, sizeof(buf), "eht #%d\n", egg_id);
     send_to_gui(s, buf);
 }
+
+void gui_event_ebo(server_t *s, int egg_id)
+{
+    char buf[64];
+
+    snprintf(buf, sizeof(buf), "ebo #%d\n", egg_id);
+    gui_send(s, buf);
+}
+
+void gui_event_pex(server_t *s, int player_id)
+{
+    char buf[64];
+
+    snprintf(buf, sizeof(buf), "pex #%d\n", player_id);
+    gui_send(s, buf);
+}

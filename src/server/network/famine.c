@@ -52,21 +52,24 @@ static void kill_player(server_t *s, int idx)
 
 void handle_famine(server_t *s)
 {
-    long long current = get_current_time();
+    long long curr = get_current_time();
     client_t *c;
 
     for (int i = 0; i < s->nb_clients; i++) {
         c = s->clients[i];
         if (!c || c->state != STATE_IN_GAME || c->type != CLIENT_AI)
             continue;
-        if (current >= c->player->next_meal_time) {
-            c->player->inventory[FOOD]--;
-            if (c->player->inventory[FOOD] <= 0) {
-                kill_player(s, i);
-                i--;
-            } else {
-                c->player->next_meal_time += get_action_duration(s->freq, 126);
-            }
+        if (curr >= c->player->next_meal_time &&
+            --c->player->inventory[FOOD] <= 0) {
+            kill_player(s, i);
+            i--;
+        } else if (curr >= c->player->next_meal_time)
+            c->player->next_meal_time += get_action_duration(s->freq, 126);
+    }
+    for (int i = 0; i < s->nb_eggs; i++) {
+        if (s->eggs[i] && s->eggs[i]->hatched && curr >= s->eggs[i]->death_time) {
+            destroy_egg(s, s->eggs[i]->id);
+            i--;
         }
     }
 }
