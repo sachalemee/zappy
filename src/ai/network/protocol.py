@@ -27,8 +27,16 @@ class Protocol:
         if welcome != "WELCOME":
             raise ConnectionError(f"Expected WELCOME, got: {welcome}")
         self.connection.send(team_name)
-        _client_num = self.connection.receive_line() # need to implement when game state done
-        width, height = self.connection.receive_line().split()
+        client_num = self.connection.receive_line() # need to implement when game state done
+        if client_num is None:
+            raise ConnectionError(
+                f"Server closed the connection right after sending team name '{team_name}' "
+                "(no slot available, or unknown team name)"
+            )
+        size_line = self.connection.receive_line()
+        if size_line is None:
+            raise ConnectionError("Server closed the connection before sending the map size")
+        width, height = size_line.split()
         return int(width), int(height)
 
     def can_send(self) -> bool:
