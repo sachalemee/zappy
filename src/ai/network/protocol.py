@@ -21,6 +21,7 @@ class Protocol:
         self.pending: deque[Action] = deque()
 
     def handshake(self, team_name: str) -> tuple[int, int]:
+        # handshake works like this : <-WELCOME, ->team name, <-client-num (free slots), <-map width/height
         welcome = self.connection.receive_line()
         if welcome != "WELCOME":
             raise ConnectionError(f"Expected WELCOME, got: {welcome}")
@@ -52,6 +53,7 @@ class Protocol:
                 if any(line.startswith(p) for p in _SERVER_PUSH_PREFIXES):
                     results.append((None, line))
                     continue
+                # incantation works like this : "Current level: N" also reaches teammates who joined without sending Incantation themselves
                 if line.startswith("Current level:") and (
                     not self.pending or self.pending[0] != Action.INCANTATION
                 ):

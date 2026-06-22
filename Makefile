@@ -72,6 +72,7 @@ GUI_SRC         = $(addprefix src/gui/, \
                     gamecamera.cpp \
                     ZoomButtons.cpp \
                     SettingsButton.cpp \
+                    TeamList.cpp \
                     renderer.cpp \
                     game/gamestate.cpp \
                 )

@@ -16,6 +16,7 @@ from src.ai.strategy.brain import Brain
 
 
 def spawn_teammate(config: Confing_args) -> None:
+    # egg hatching works like this : a new client just needs to connect to the team, the server randomly assigns it to a waiting egg
     subprocess.Popen([
         sys.executable, "-m", "src.ai.main",
         "-p", str(config.port), "-n", config.name, "-h", config.machine,
@@ -33,13 +34,13 @@ def main(argv: list[str] = sys.argv) -> None:
     brain = Brain(state)
 
     while True:
-        # one command in flight at a time : brain reacts to the latest known state, so queuing more before a response comes back would make it repeat stale decisions (e.g. turning multiple times for one right)
+        # one command in flight at a time : brain reacts to the latest known state, so queuing more before a response comes back would make it repeat stale decisions (e.g. : turning multiple times for one right)
         if not protocol.pending:
             action = brain.decide()
             protocol.send_command(action, brain.next_argument)
 
         for action, response in protocol.poll_responses():
-            if response == "dead":
+            if response == "dead": # death works like this : no command, server just pushes this
                 connection.close()
                 return
             if action is None:
