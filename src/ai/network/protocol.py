@@ -14,7 +14,7 @@ from src.ai.strategy.actions import Action
 MAX_PENDING_COMMANDS = 10
 
 ## Lines pushed by the server outside of the request/response flow
-_SERVER_PUSH_PREFIXES = ("message ", "dead", "eject:")
+_SERVER_PUSH_PREFIXES = ("message ", "dead", "eject:", "Elevation underway")
 
 
 class Protocol:
@@ -47,6 +47,11 @@ class Protocol:
                 if line is None:
                     break
                 if any(line.startswith(p) for p in _SERVER_PUSH_PREFIXES):
+                    results.append((None, line))
+                    continue
+                if line.startswith("Current level:") and (
+                    not self.pending or self.pending[0] != Action.INCANTATION
+                ):
                     results.append((None, line))
                     continue
                 if self.pending:
