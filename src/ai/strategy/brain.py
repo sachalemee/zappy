@@ -47,6 +47,10 @@ class Brain:
 
         self.fsm.transition(self.state) # pick the priority state for this tick
 
+        tile = self.state.current_tile()
+        if self.fsm.state in (State.COLLECT, State.SURVIVE) and tile and tile.players_here > 1:
+            return Action.EJECT
+
         if self.fsm.state == State.INCANTATE:
             if self._incantation_pending:
                 return Action.LOOK # wait for the result instead of resending
@@ -67,8 +71,6 @@ class Brain:
                 self.state.incoming_call = None
             else:
                 return Navigator.move_toward_sound(k)
-
-        tile = self.state.current_tile()
 
         if self.fsm.state == State.SURVIVE:
             if tile and tile.resources.get("food", 0) > 0:
@@ -149,6 +151,8 @@ class Brain:
                 self.state.level = int(response.rsplit(":", 1)[-1].strip())
         elif action == Action.FORK and response == "ok":
             self.state.pending_spawns += 1
+        elif action == Action.EJECT and response == "ok":
+            self._ticks_since_look = LOOK_POLL_INTERVAL # tile just got cleared, refresh vision
 
     def move_resource(self, resource: str, from_tile: bool) -> None:
         tile = self.state.current_tile()
