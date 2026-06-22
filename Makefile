@@ -75,6 +75,7 @@ GUI_SRC         = $(addprefix src/gui/, \
                     TeamList.cpp \
                     renderer.cpp \
                     game/gamestate.cpp \
+                    audio/audio_manager.cpp \
                 )
 
 GUI_NAME		= zappy_gui
@@ -141,14 +142,17 @@ obj/gui/Menu.o:		src/gui/menu_gui/Menu.cpp
 obj/gui/TextBox.o:	src/gui/menu_gui/TextBox.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
-obj/gui/network_client.o:    src/gui/network/network_client.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+obj/gui/network_client.o:	src/gui/network/network_client.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
-obj/gui/connection_manager.o:    src/gui/network/connection_manager.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+obj/gui/connection_manager.o:	src/gui/network/connection_manager.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
-obj/gui/gamestate.o:    src/gui/game/gamestate.cpp
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+obj/gui/gamestate.o:	src/gui/game/gamestate.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/audio_manager.o:	src/gui/audio/audio_manager.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 clean:
 				$(RM) -r $(SERVER_OBJ_DIR) $(GUI_OBJ_DIR)
