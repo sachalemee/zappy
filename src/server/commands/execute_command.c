@@ -63,7 +63,7 @@ static void finish_command(client_t *c)
 {
     const cmd_map_t *cmd;
     long long current = get_current_time();
-
+ 
     if (c->nb_cmds == 0 || c->action_end_time == 0 || 
         current < c->action_end_time)
         return;

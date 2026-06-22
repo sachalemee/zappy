@@ -18,6 +18,7 @@
 #include "SettingsButton.hpp"
 #include "settings.hpp"
 #include "TeamList.hpp"
+#include "audio/audio_manager.hpp"
 #include <string>
 
 class application {
@@ -31,6 +32,7 @@ private:
     void connectFromMenu();
 
     Window _window;
+    AudioManager _audio;
     Menu _menu;
     connection_manager _connection;
     game_state _state;
@@ -41,6 +43,7 @@ private:
     Settings _settings;
     TeamList _teamList;
     bool _inGame = false;
+    
 };
 
 #endif /* APPLICATION_HPP_ */

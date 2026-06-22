@@ -8,7 +8,7 @@
 #include "application.hpp"
 
 application::application()
-    : _window(1920, 1080, "ZAPPY GUI")
+    : _window(1920, 1080, "ZAPPY")
 {
 }
  
@@ -34,7 +34,7 @@ void application::updateMenu()
 
 void application::updateGame()
 {
-    _connection.update(_state);
+    _connection.update(_state, _audio);
     if (!_settings.isOpen())
         _camera.update(50.0f);
     if (!_settings.isOpen())
