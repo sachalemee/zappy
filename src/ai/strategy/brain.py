@@ -26,7 +26,6 @@ class Brain:
         self.fsm = FSM()
         self.navigator = Navigator()
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
-        self._check_egg_slots = False # trigger connect_nbr after a successful fork
         self._incantation_pending = False # an incantation result hasn't come back yet
         self._broadcast_cooldown = 0
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL # force an inventory on the first tick
@@ -34,10 +33,6 @@ class Brain:
 
     def decide(self) -> Action:
         self.next_argument = None
-
-        if self._check_egg_slots:
-            self._check_egg_slots = False
-            return Action.CONNECT_NBR
 
         self._ticks_since_look += 1
         self._ticks_since_inventory += 1
@@ -153,12 +148,7 @@ class Brain:
             if "Current level" in response:
                 self.state.level = int(response.rsplit(":", 1)[-1].strip())
         elif action == Action.FORK and response == "ok":
-            self._check_egg_slots = True
-        elif action == Action.CONNECT_NBR:
-            try:
-                self.state.egg_slots = int(response.strip())
-            except ValueError:
-                pass
+            self.state.pending_spawns += 1
 
     def move_resource(self, resource: str, from_tile: bool) -> None:
         tile = self.state.current_tile()

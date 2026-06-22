@@ -52,6 +52,6 @@ def main(argv: list[str] = sys.argv) -> None:
                 continue
             brain.update(action, response)
 
-        if state.egg_slots > 0:
-            state.egg_slots -= 1
+        if state.pending_spawns > 0:
+            state.pending_spawns -= 1
             spawn_teammate(config)
