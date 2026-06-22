@@ -64,13 +64,19 @@ class FSM:
         resources_ready = self.ready_to_incantate(game_state)
         players_ready = tile is not None and has_enough_players(game_state.level, tile.players_here)
 
+        incoming_call = game_state.incoming_call is not None and game_state.incoming_call[0] == game_state.level
+
         if resources_ready and players_ready:
             self.state = State.INCANTATE # everything is here, level up now
-        elif resources_ready and not players_ready:
-            self.state = State.BROADCAST # call for help
-        elif game_state.incoming_call is not None and game_state.incoming_call[0] == game_state.level:
-            self.state = State.GATHER # a teammate is calling
+        elif incoming_call:
+            # someone else is already recruiting for my level ; join them instead of
+            # also broadcasting from my own spot, or we'd both wait for the other forever
+            self.state = State.GATHER
         elif self.has_fork_surplus(game_state):
-            self.state = State.FORK # enough surplus, grow the team
+            # growing the team is more useful than calling into the void if nobody's
+            # around yet ; the stones we already dropped just wait for a future teammate
+            self.state = State.FORK
+        elif resources_ready:
+            self.state = State.BROADCAST # call for help
         else:
             self.state = State.COLLECT # default : explore and gather

@@ -99,9 +99,11 @@ class Navigator:
 
     @staticmethod
     def move_toward_sound(k: int) -> Action:
-        # broadcast sound works like this : k=0 means we're on the emitter's tile, k=1 is straight ahead, k=2..8 circle around the player; assumes clockwise ordering (no diagram to confirm trigonometric dir)
+        # broadcast sound works like this : k=0 means we're on the emitter's tile, k=1 is straight
+        # ahead ; per the subject's diagram, 2..8 circle the player "trigonomically" (counter-
+        # clockwise) from there, so 2/3/4 land on our left and 6/7/8 on our right
         if k == 1:
             return Action.FORWARD
-        if k in (2, 3, 4, 5):
-            return Action.RIGHT
-        return Action.LEFT
+        if k in (2, 3, 4):
+            return Action.LEFT
+        return Action.RIGHT
