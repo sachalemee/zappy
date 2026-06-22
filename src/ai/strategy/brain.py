@@ -27,6 +27,7 @@ class Brain:
         self.navigator = Navigator()
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
         self._incantation_pending = False
+        self._depositing = False # once the bag has everything needed, stay in deposit mode until the ground does too (avoids take/set flip-flopping on the same stone)
         self._broadcast_cooldown = 0
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
         self._ticks_since_look = LOOK_POLL_INTERVAL
@@ -81,20 +82,27 @@ class Brain:
             return self.navigator.move_toward_ressource(self.state)
 
         if tile:
-            # incantation needs stones on the ground, not in the bag
-            tile_missing = missing_resources(self.state.level, tile.resources)
-            for resource, amount in tile_missing.items():
-                if amount > 0 and self.state.inventory.quantity_of(resource) > 0:
-                    self.next_argument = resource
-                    return Action.SET
+            bag_missing = missing_resources(self.state.level, self.state.inventory.items)
+            if not self._depositing and not any(amount > 0 for amount in bag_missing.values()):
+                self._depositing = True # bag is fully stocked for this level, commit to dropping it here
 
-            # only take what's in excess of this tile's own incantation requirement,
-            # otherwise we'd take/set the same stone back and forth forever
-            required_here = INCANTATION_REQUIREMENTS.get(self.state.level, {})
-            for resource, quantity in tile.resources.items():
-                if resource != "food" and quantity > required_here.get(resource, 0):
-                    self.next_argument = resource
-                    return Action.TAKE
+            if self._depositing:
+                # incantation needs stones on the ground, not in the bag ; deposit everything
+                # we're carrying before ever taking anything again, so we don't undo our own drop
+                tile_missing = missing_resources(self.state.level, tile.resources)
+                for resource, amount in tile_missing.items():
+                    if amount > 0 and self.state.inventory.quantity_of(resource) > 0:
+                        self.next_argument = resource
+                        return Action.SET
+                self._depositing = False # nothing left to drop here, free to gather again
+            else:
+                # only take what's in excess of this tile's own incantation requirement,
+                # otherwise we'd take/set the same stone back and forth forever
+                required_here = INCANTATION_REQUIREMENTS.get(self.state.level, {})
+                for resource, quantity in tile.resources.items():
+                    if resource != "food" and quantity > required_here.get(resource, 0):
+                        self.next_argument = resource
+                        return Action.TAKE
 
         return self.navigator.move_toward_ressource(self.state)
 
