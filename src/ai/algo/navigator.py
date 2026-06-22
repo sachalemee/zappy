@@ -20,16 +20,17 @@ DELTAS = {
 }
 
 class Navigator:
-    def __init__(self):
+    def __init__(self, start_offset: int = 0):
         self.visited: set[tuple[int, int]] = set()
         self.stack: list[tuple[int, int]] = []
+        self._direction_order = [(start_offset + i) % 4 for i in range(4)]
 
-    @staticmethod
-    def neighbors(pos: tuple[int, int], width: int, height: int) -> list[tuple[int, int]]:
+    def neighbors(self, pos: tuple[int, int], width: int, height: int) -> list[tuple[int, int]]:
         x, y = pos
         neighbors = []
 
-        for dx, dy in DELTAS.values():
+        for direction in self._direction_order:
+            dx, dy = DELTAS[direction]
             neighbor_x = (x + dx) % width
             neighbor_y = (y + dy) % height
             neighbors.append((neighbor_x, neighbor_y))

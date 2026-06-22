@@ -11,9 +11,6 @@ from collections import deque
 from src.ai.network.connection import Connection
 from src.ai.strategy.actions import Action
 
-# the pending queue works like this : up to 10 commands may be sent without a response, anything beyond that the server just ignores
-MAX_PENDING_COMMANDS = 10
-
 ## Lines pushed by the server outside of the request/response flow
 _SERVER_PUSH_PREFIXES = ("message ", "dead", "eject:", "Elevation underway")
 
@@ -40,9 +37,6 @@ class Protocol:
             raise ConnectionError("Server closed the connection before sending the map size")
         width, height = size_line.split()
         return int(width), int(height)
-
-    def can_send(self) -> bool:
-        return len(self.pending) < MAX_PENDING_COMMANDS
 
     def send_command(self, action: Action, argument: str | None = None) -> None:
         self.connection.send(action.to_command(argument))

@@ -5,6 +5,8 @@
 ## brain
 ##
 
+import os
+
 from src.ai.game.state import GameState
 from src.ai.game.tile import Tile
 from src.ai.game.inventory import Inventory
@@ -24,7 +26,9 @@ class Brain:
     def __init__(self, state: GameState):
         self.state = state
         self.fsm = FSM()
-        self.navigator = Navigator()
+        # each AI process gets a different exploration order so siblings spawned
+        # near each other (e.g. via Fork) fan out instead of retracing the same path
+        self.navigator = Navigator(start_offset=os.getpid() % 4)
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
         self._incantation_pending = False
         self._broadcast_cooldown = 0
