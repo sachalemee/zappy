@@ -35,6 +35,7 @@ struct Egg {
 class game_state {
 public:
     bool handleLine(const std::string &line);
+    void reset();
     bool ready() const { return _width > 0 && _height > 0; }
     int width() const { return _width; }
     int height() const { return _height; }
