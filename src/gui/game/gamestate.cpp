@@ -16,6 +16,17 @@ int game_state::extractId(const std::string &token)
     return std::stoi(token);
 }
 
+void game_state::reset()
+{
+    _width = 0;
+    _height = 0;
+    _timeUnit = 100;
+    _tiles.clear();
+    _teams.clear();
+    _players.clear();
+    _eggs.clear();
+}
+
 Player *game_state::findPlayer(int id)
 {
     for (auto &player : _players)

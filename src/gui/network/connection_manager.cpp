@@ -34,6 +34,12 @@ void connection_manager::handleLine(const std::string &line, game_state &state)
 
 void connection_manager::update(game_state &state)
 {
+    if (_isConnected && !_net.isConnected()) {
+        state.reset();
+        _isConnected = false;
+        return;
+    }
+
     std::vector<std::string> lines = _net.poll();
 
     for (std::size_t i = 0; i < lines.size(); i++)
