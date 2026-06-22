@@ -11,7 +11,7 @@ from src.ai.game.inventory import Inventory
 
 from src.ai.strategy.actions import Action
 
-from src.ai.algo.fsm import FSM, State
+from src.ai.algo.fsm import FSM, State, FORK_FOOD_THRESHOLD
 from src.ai.algo.requirements import INCANTATION_REQUIREMENTS, missing_resources
 from src.ai.algo.navigator import Navigator
 from src.ai.algo.coordinator import Coordinator
@@ -128,12 +128,15 @@ class Brain:
             else:
                 # gather up to what incantation needs (at least 1 of each, even past the
                 # requirement, so a fork-worthy stockpile can build up too) ; safe from
-                # flip-flopping with Set since we only get here while _depositing is False
+                # flip-flopping with Set since we only get here while _depositing is False ;
+                # food is topped up the same way instead of only when already starving,
+                # otherwise it never climbs high enough to afford forking
                 required_here = INCANTATION_REQUIREMENTS.get(self.state.level, {})
                 for resource, quantity in tile.resources.items():
                     if resource == "food":
-                        continue
-                    target = max(required_here.get(resource, 0), 1)
+                        target = FORK_FOOD_THRESHOLD
+                    else:
+                        target = max(required_here.get(resource, 0), 1)
                     if quantity > 0 and self.state.inventory.quantity_of(resource) < target:
                         self.next_argument = resource
                         return Action.TAKE

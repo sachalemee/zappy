@@ -72,9 +72,11 @@ class FSM:
             # someone else is already recruiting for my level ; join them instead of
             # also broadcasting from my own spot, or we'd both wait for the other forever
             self.state = State.GATHER
+        elif self.has_fork_surplus(game_state):
+            # growing the team is more useful than calling into the void if nobody's
+            # around yet ; the stones we already dropped just wait for a future teammate
+            self.state = State.FORK
         elif resources_ready:
             self.state = State.BROADCAST # call for help
-        elif self.has_fork_surplus(game_state):
-            self.state = State.FORK # enough surplus, grow the team
         else:
             self.state = State.COLLECT # default : explore and gather
