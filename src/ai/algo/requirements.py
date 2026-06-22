@@ -5,6 +5,7 @@
 ## requirements
 ##
 
+# elevation works like this : key = current level, values = players and stones needed on the ground to reach key+1 (subject's elevation table)
 INCANTATION_REQUIREMENTS = {
     1: {
             "players": 1, "linemate": 1, "deraumere": 0, "sibur": 0, "mendiane": 0, "phiras": 0, "thystame": 0

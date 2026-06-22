@@ -37,6 +37,7 @@ class Navigator:
 
     @staticmethod
     def shortest_delta(delta: int, size: int) -> int:
+        # the map wraps like this : going off one edge re-enters on the other, so the shortest path may cross the wraparound point
         half_size = size // 2
         return (delta + half_size) % size - half_size
 
@@ -97,8 +98,7 @@ class Navigator:
 
     @staticmethod
     def move_toward_sound(k: int) -> Action:
-        # k -> sound direction from a broadcast (0=here, 1=front, 2..8 clockwise around the player)
-        # k == 0 -> player already arrived
+        # broadcast sound works like this : k=0 means we're on the emitter's tile, k=1 is straight ahead, k=2..8 circle around the player; assumes clockwise ordering (no diagram to confirm trigonometric dir)
         if k == 1:
             return Action.FORWARD
         if k in (2, 3, 4, 5):

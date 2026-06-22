@@ -26,18 +26,13 @@ class Brain:
         self.fsm = FSM()
         self.navigator = Navigator()
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
-        self._check_egg_slots = False # trigger connect_nbr after a successful fork
-        self._incantation_pending = False # an incantation result hasn't come back yet
+        self._incantation_pending = False
         self._broadcast_cooldown = 0
-        self._ticks_since_inventory = INVENTORY_POLL_INTERVAL # force an inventory on the first tick
-        self._ticks_since_look = LOOK_POLL_INTERVAL # force a look on the first tick
+        self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
+        self._ticks_since_look = LOOK_POLL_INTERVAL
 
     def decide(self) -> Action:
         self.next_argument = None
-
-        if self._check_egg_slots:
-            self._check_egg_slots = False
-            return Action.CONNECT_NBR
 
         self._ticks_since_look += 1
         self._ticks_since_inventory += 1
@@ -50,15 +45,21 @@ class Brain:
             self._ticks_since_inventory = 0
             return Action.INVENTORY
 
-        self.fsm.transition(self.state) # pick the priority state for this tick
+        self.fsm.transition(self.state)
+
+        tile = self.state.current_tile()
+        # eject works like this : pushes everyone else off the tile (and destroys their eggs there); only outside of GATHER/INCANTATE/BROADCAST so we never eject players we actually want to elevate with
+        if self.fsm.state in (State.COLLECT, State.SURVIVE) and tile and tile.players_here > 1:
+            return Action.EJECT
 
         if self.fsm.state == State.INCANTATE:
+            # incantation works like this : frozen 300/f ticks, two replies ("Elevation underway" then "Current level: N"/"ko"); don't resend
             if self._incantation_pending:
-                return Action.LOOK # wait for the result instead of resending
+                return Action.LOOK
             self._incantation_pending = True
             return Action.INCANTATION
         if self.fsm.state == State.FORK:
-            return Action.FORK
+            return Action.FORK # lays an egg, adds one free slot to the team
         if self.fsm.state == State.BROADCAST:
             if self._broadcast_cooldown > 0:
                 self._broadcast_cooldown -= 1
@@ -72,8 +73,6 @@ class Brain:
                 self.state.incoming_call = None
             else:
                 return Navigator.move_toward_sound(k)
-
-        tile = self.state.current_tile()
 
         if self.fsm.state == State.SURVIVE:
             if tile and tile.resources.get("food", 0) > 0:
@@ -135,6 +134,7 @@ class Brain:
         response = response.strip()
 
         if action == Action.LOOK and response.startswith("["):
+            # the tile separator is a comma, with or without a space after it
             entries = response.strip("[]").split(",")
             self.state.update_vision([Tile.from_look_entry(entry) for entry in entries])
         elif action == Action.INVENTORY and response.startswith("["):
@@ -153,12 +153,10 @@ class Brain:
             if "Current level" in response:
                 self.state.level = int(response.rsplit(":", 1)[-1].strip())
         elif action == Action.FORK and response == "ok":
-            self._check_egg_slots = True
-        elif action == Action.CONNECT_NBR:
-            try:
-                self.state.egg_slots = int(response.strip())
-            except ValueError:
-                pass
+            # fork works like this : lays an egg and frees a team slot; we track it locally instead of polling Connect_nbr
+            self.state.pending_spawns += 1
+        elif action == Action.EJECT and response == "ok":
+            self._ticks_since_look = LOOK_POLL_INTERVAL # tile just got cleared, refresh vision
 
     def move_resource(self, resource: str, from_tile: bool) -> None:
         tile = self.state.current_tile()

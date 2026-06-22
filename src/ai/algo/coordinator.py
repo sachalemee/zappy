@@ -29,6 +29,7 @@ class Coordinator:
 
     @staticmethod
     def parse_broadcast_line(line: str) -> tuple[int, str] | None:
+        # broadcast works like this : server sends "message K, <text>" to every player, K being the sound direction the text came from
         if not line.startswith("message "):
             return None
         header, sep, text = line.partition(",")
