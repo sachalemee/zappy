@@ -66,10 +66,4 @@ void handle_famine(server_t *s)
         } else if (curr >= c->player->next_meal_time)
             c->player->next_meal_time += get_action_duration(s->freq, 126);
     }
-    for (int i = 0; i < s->nb_eggs; i++) {
-        if (s->eggs[i] && s->eggs[i]->hatched && curr >= s->eggs[i]->death_time) {
-            destroy_egg(s, s->eggs[i]->id);
-            i--;
-        }
-    }
 }
