@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2026
-** G-YEP-400-PAR-4-1-zappy-11
+** zappy
 ** File description:
 ** connection_manager
 */
@@ -11,6 +11,7 @@
 #include "network/network_client.hpp"
 #include "game/gamestate.hpp"
 #include "audio/audio_manager.hpp"
+#include <sstream>
 #include <string>
 
 class connection_manager {
@@ -26,6 +27,8 @@ private:
     void handleLine(const std::string &line, game_state &state,
         AudioManager &audio);
     void playEventSound(const std::string &line, AudioManager &audio);
+    SoundId resourceSound(std::istringstream &args, SoundId fallback) const;
+    bool incantationFailed(std::istringstream &args) const;
 
     network_client _net;
     bool _isConnected = false;
