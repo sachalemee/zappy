@@ -47,6 +47,8 @@ def main(argv: list[str] = sys.argv) -> None:
                     continue
                 if brain.handle_eject(response):
                     continue
+                if brain.handle_level_up(response):
+                    continue
                 continue
             brain.update(action, response)
 

@@ -121,6 +121,16 @@ class Brain:
         self.state.apply_eject(k)
         return True
 
+    def handle_level_up(self, line: str) -> bool:
+        line = line.strip()
+        if not line.startswith("Current level:"):
+            return False
+        try:
+            self.state.level = int(line.rsplit(":", 1)[-1].strip())
+        except ValueError:
+            return False
+        return True
+
     def update(self, action: Action, response: str) -> None:
         response = response.strip()
 
