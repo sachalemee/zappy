@@ -43,7 +43,6 @@ private:
     Settings _settings;
     TeamList _teamList;
     bool _inGame = false;
-    
 };
 
 #endif /* APPLICATION_HPP_ */
