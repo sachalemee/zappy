@@ -163,7 +163,23 @@ class Brain:
                         self.next_argument = resource
                         return Action.TAKE
 
+        known_target = self._next_known_target()
+        if known_target is not None:
+            resource, position = known_target
+            if position == self.state.position:
+                del self.state.known_resources[resource] # we're here and it's gone ; was either ours or already taken
+            else:
+                return Navigator.move_toward_position(self.state, position)
+
         return self.navigator.move_toward_ressource(self.state)
+
+    def _next_known_target(self) -> tuple[str, tuple[int, int]] | None:
+        required_here = INCANTATION_REQUIREMENTS.get(self.state.level, {})
+        for resource, position in self.state.known_resources.items():
+            target = FORK_FOOD_THRESHOLD if resource == "food" else max(required_here.get(resource, 0), 1)
+            if self.state.inventory.quantity_of(resource) < target:
+                return resource, position
+        return None
 
     def handle_broadcast(self, line: str) -> bool:
         parsed = Coordinator.parse_broadcast_line(line)
