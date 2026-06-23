@@ -60,8 +60,6 @@ def main(argv: list[str] = sys.argv) -> None:
                 log(f"state: pos={state.position} dir={state.direction} level={state.level}")
 
         if connection.closed_by_peer:
-            # the server closes every client's socket on shutdown, win or not ; same
-            # graceful exit as "dead", just without that explicit message first
             log("server closed the connection")
             return
 
