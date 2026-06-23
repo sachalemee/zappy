@@ -38,6 +38,7 @@ class Brain:
         self._broadcast_cooldown = 0
         self._broadcast_attempts = 0 # consecutive Broadcasts sent with nobody showing up
         self._just_gave_up = False # reclaimed our stones after giving up ; walk away before trying this spot again
+        self._reported_resources: dict[str, tuple[int, int]] = {} # resource -> position we last broadcast it from, so we don't repeat every tick
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
         self._ticks_since_look = LOOK_POLL_INTERVAL
         self._ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
@@ -115,6 +116,16 @@ class Brain:
             return self.navigator.move_toward_ressource(self.state)
 
         if tile:
+            for resource, quantity in tile.resources.items():
+                if resource == "food" or quantity <= 0:
+                    continue
+                if self._reported_resources.get(resource) == self.state.position:
+                    continue
+                self._reported_resources[resource] = self.state.position
+                self.next_argument = Coordinator.encode_resource_report(
+                    self.state.team_name, resource, *self.state.position)
+                return Action.BROADCAST
+
             bag_missing = missing_resources(self.state.level, self.state.inventory.items)
             bag_complete = not any(amount > 0 for amount in bag_missing.values())
 
@@ -163,6 +174,12 @@ class Brain:
         level = Coordinator.parse_incant_call(self.state.team_name, text)
         if level is not None and level == self.state.level:
             self.state.incoming_call = (level, k)
+            return True
+
+        report = Coordinator.parse_resource_report(self.state.team_name, text)
+        if report is not None:
+            resource, x, y = report
+            self.state.known_resources[resource] = (x, y)
         return True
 
     def handle_eject(self, line: str) -> bool:
