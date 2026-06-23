@@ -106,6 +106,19 @@ void game_state::parsePlayerLevel(std::istringstream &args)
         player->level = level;
 }
 
+void game_state::parsePlayerInventory(std::istringstream &args)
+{
+    std::string token;
+    Player *player = nullptr;
+
+    args >> token;
+    player = findPlayer(extractId(token));
+    if (player == nullptr)
+        return;
+    for (int i = 0; i < 7; i++)
+        args >> player->inventory[i];
+}
+
 void game_state::parsePlayerDeath(std::istringstream &args)
 {
     std::string token;
@@ -149,6 +162,7 @@ bool game_state::handleLine(const std::string &line)
         {"pnw", &game_state::parseNewPlayer},
         {"ppo", &game_state::parsePlayerPosition},
         {"plv", &game_state::parsePlayerLevel},
+        {"pin", &game_state::parsePlayerInventory},
         {"pdi", &game_state::parsePlayerDeath},
         {"enw", &game_state::parseNewEgg},
         {"ebo", &game_state::parseEggRemoval},
