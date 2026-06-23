@@ -21,16 +21,37 @@ static void sigint_handler(int dummy)
     server_is_running = 0;
 }
 
+static void destroy_client_player(server_t *s, client_t *c)
+{
+    char buf[64];
+
+    if (!c->player) return;
+    snprintf(buf, sizeof(buf), "pdi #%d\n", c->player->id);
+    send_to_gui(s, buf);
+    for (int k = 0; k < s->nb_players; k++) {
+        if (s->players[k] == c->player) {
+            free(c->player);
+            for (int j = k; j < s->nb_players - 1; j++)
+                s->players[j] = s->players[j + 1];
+            s->players[s->nb_players - 1] = NULL;
+            s->nb_players--;
+            break;
+        }
+    }
+    c->player = NULL;
+}
+
 static void remove_client(server_t *s, int i)
 {
     if (!s->clients || !s->clients[i])
         return;
     if (s->clients[i]->fd != -1)
         close(s->clients[i]->fd);
+    if (s->clients[i]->type == CLIENT_AI)
+        destroy_client_player(s, s->clients[i]);
     free(s->clients[i]);
-    for (int j = i; j < s->nb_clients - 1; j++) {
+    for (int j = i; j < s->nb_clients - 1; j++)
         s->clients[j] = s->clients[j + 1];
-    }
     s->clients[s->nb_clients - 1] = NULL;
     s->nb_clients--;
 }
