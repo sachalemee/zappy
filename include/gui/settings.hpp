@@ -29,6 +29,7 @@ private:
     void drawSensitivity();
     void drawElevationKeys();
     void drawWindowMode();
+    void drawMiscKeys();
     void handleOutsideClick();
     void drawKeyRow(float x, float y, const char *key, const char *label);
 
