@@ -22,6 +22,7 @@ BROADCAST_COOLDOWN = 5 # ticks between two incantation call broadcasts
 BROADCAST_GIVEUP_LIMIT = 5 # consecutive unanswered calls before abandoning this spot
 INVENTORY_POLL_INTERVAL = 20 # ticks between two Inventory refreshes
 LOOK_POLL_INTERVAL = 5 # ticks between two Look refreshes while stationary
+CONNECT_NBR_POLL_INTERVAL = 20 # ticks between two Connect_nbr refreshes
 
 class Brain:
     def __init__(self, state: GameState):
@@ -39,12 +40,14 @@ class Brain:
         self._just_gave_up = False # reclaimed our stones after giving up ; walk away before trying this spot again
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
         self._ticks_since_look = LOOK_POLL_INTERVAL
+        self._ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
 
     def decide(self) -> Action:
         self.next_argument = None
 
         self._ticks_since_look += 1
         self._ticks_since_inventory += 1
+        self._ticks_since_connect_nbr += 1
 
         if self._ticks_since_look >= LOOK_POLL_INTERVAL:
             self._ticks_since_look = 0
@@ -53,6 +56,10 @@ class Brain:
         if self._ticks_since_inventory >= INVENTORY_POLL_INTERVAL:
             self._ticks_since_inventory = 0
             return Action.INVENTORY
+
+        if self._ticks_since_connect_nbr >= CONNECT_NBR_POLL_INTERVAL:
+            self._ticks_since_connect_nbr = 0
+            return Action.CONNECT_NBR
 
         self.fsm.transition(self.state)
 
@@ -202,8 +209,14 @@ class Brain:
             if "Current level" in response:
                 self.state.level = int(response.rsplit(":", 1)[-1].strip())
         elif action == Action.FORK and response == "ok":
-            # fork works like this : lays an egg and frees a team slot; we track it locally instead of polling Connect_nbr
-            self.state.pending_spawns += 1
+            # fork works like this : lays an egg and frees a team slot ; the real count (which also moves from other processes' forks or
+            # eggs already on the board at startup) only comes from the server, so re-poll Connect_nbr next tick instead of guessing
+            self._ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
+        elif action == Action.CONNECT_NBR:
+            try:
+                self.state.known_free_slots = int(response)
+            except ValueError:
+                pass
         elif action == Action.EJECT and response == "ok":
             self._ticks_since_look = LOOK_POLL_INTERVAL # tile just got cleared, refresh vision
 

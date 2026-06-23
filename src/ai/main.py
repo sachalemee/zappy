@@ -53,6 +53,10 @@ def main(argv: list[str] = sys.argv) -> None:
                 continue
             brain.update(action, response)
 
-        if state.pending_spawns > 0:
-            state.pending_spawns -= 1
+        if state.known_free_slots > 0:
+            # known_free_slots is resynced from the server every CONNECT_NBR_POLL_INTERVAL ticks,
+            # so this self-correcting decrement never drifts permanently out of sync ; if several
+            # processes spawn for the same slot, the server's free_slots check at handshake just
+            # rejects the extra connection instead of corrupting team state
+            state.known_free_slots -= 1
             spawn_teammate(config)

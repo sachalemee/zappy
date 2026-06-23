@@ -34,7 +34,7 @@ class GameState:
         self.inventory = Inventory()
         self.vision: list[Tile] = []
         self.incoming_call: tuple[int, int] | None = None # last incantation call heard (level, k), if any
-        self.pending_spawns = 0 # eggs laid by my own forks, still waiting for a teammate process
+        self.known_free_slots = 0 # team's free egg slots, as last reported by the server via Connect_nbr
 
     def update_vision(self, tiles: list[Tile]) -> None:
         self.vision = tiles
