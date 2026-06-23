@@ -23,6 +23,7 @@ class Tile:
 
     @staticmethod
     def from_look_entry(entry: str) -> "Tile":
+        # the look response works like this : one entry per tile, words space-separated ("player deraumere"), entries comma-separated
         tile = Tile()
         for word in entry.split():
             if word == "player":

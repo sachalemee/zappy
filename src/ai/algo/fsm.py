@@ -9,7 +9,9 @@ from enum import Enum, auto
 
 from src.ai.algo.requirements import INCANTATION_REQUIREMENTS, missing_resources, has_enough_players
 
-SURVIVAL_THRESHOLD = 50 # below this food count, survival takes priority
+# food works like this : 1 unit = 126 time units of life, so this
+# threshold gives a comfortable margin before actually starving
+SURVIVAL_THRESHOLD = 50
 
 FORK_FOOD_THRESHOLD = 100 # min food surplus before forking
 
@@ -35,12 +37,13 @@ class FSM:
         self.state = State.COLLECT
 
     def ready_to_incantate(self, game_state) -> bool:
-        if game_state.level not in INCANTATION_REQUIREMENTS: # already at max level
+        # incantation works like this : stones must be laid on the ground tile, not just carried in the bag (subject's elevation ritual)
+        if game_state.level not in INCANTATION_REQUIREMENTS: # level 8 is max
             return False
         tile = game_state.current_tile()
         if tile is None:
             return False
-        missing = missing_resources(game_state.level, tile.resources) # stones must be on the ground
+        missing = missing_resources(game_state.level, tile.resources)
         return all(amount == 0 for amount in missing.values())
 
     def has_fork_surplus(self, game_state) -> bool:
@@ -61,13 +64,19 @@ class FSM:
         resources_ready = self.ready_to_incantate(game_state)
         players_ready = tile is not None and has_enough_players(game_state.level, tile.players_here)
 
+        incoming_call = game_state.incoming_call is not None and game_state.incoming_call[0] == game_state.level
+
         if resources_ready and players_ready:
             self.state = State.INCANTATE # everything is here, level up now
-        elif resources_ready and not players_ready:
-            self.state = State.BROADCAST # call for help
-        elif game_state.incoming_call is not None and game_state.incoming_call[0] == game_state.level:
-            self.state = State.GATHER # a teammate is calling
+        elif incoming_call:
+            # someone else is already recruiting for my level ; join them instead of
+            # also broadcasting from my own spot, or we'd both wait for the other forever
+            self.state = State.GATHER
         elif self.has_fork_surplus(game_state):
-            self.state = State.FORK # enough surplus, grow the team
+            # growing the team is more useful than calling into the void if nobody's
+            # around yet ; the stones we already dropped just wait for a future teammate
+            self.state = State.FORK
+        elif resources_ready:
+            self.state = State.BROADCAST # call for help
         else:
             self.state = State.COLLECT # default : explore and gather

@@ -12,8 +12,10 @@
 
 static void reject_client(client_t *c)
 {
-    if (c->fd >= 0)
+    if (c->fd >= 0) {
+        write(c->fd, "ko\n", 3);
         close(c->fd);
+    }
     c->fd = -1;
 }
 

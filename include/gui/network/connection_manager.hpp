@@ -10,21 +10,26 @@
 
 #include "network/network_client.hpp"
 #include "game/gamestate.hpp"
+#include "audio/audio_manager.hpp"
+#include <sstream>
 #include <string>
 
 class connection_manager {
 public:
     connection_manager() = default;
-
     bool connect(const std::string &host, int port);
     void disconnect();
-    void update(game_state &state);
+    void update(game_state &state, AudioManager &audio);
     bool sendCommand(const std::string &cmd) { return _net.sendLine(cmd); }
     bool isConnected() const { return _net.isConnected(); }
     bool isReady() const { return _isConnected; }
 
 private:
-    void handleLine(const std::string &line, game_state &state);
+    void handleLine(const std::string &line, game_state &state,
+        AudioManager &audio);
+    void playEventSound(const std::string &line, AudioManager &audio);
+    SoundId resourceSound(std::istringstream &args, SoundId fallback) const;
+    bool incantationFailed(std::istringstream &args) const;
 
     network_client _net;
     bool _isConnected = false;

@@ -20,16 +20,17 @@ DELTAS = {
 }
 
 class Navigator:
-    def __init__(self):
+    def __init__(self, start_offset: int = 0):
         self.visited: set[tuple[int, int]] = set()
         self.stack: list[tuple[int, int]] = []
+        self._direction_order = [(start_offset + i) % 4 for i in range(4)]
 
-    @staticmethod
-    def neighbors(pos: tuple[int, int], width: int, height: int) -> list[tuple[int, int]]:
+    def neighbors(self, pos: tuple[int, int], width: int, height: int) -> list[tuple[int, int]]:
         x, y = pos
         neighbors = []
 
-        for dx, dy in DELTAS.values():
+        for direction in self._direction_order:
+            dx, dy = DELTAS[direction]
             neighbor_x = (x + dx) % width
             neighbor_y = (y + dy) % height
             neighbors.append((neighbor_x, neighbor_y))
@@ -37,6 +38,7 @@ class Navigator:
 
     @staticmethod
     def shortest_delta(delta: int, size: int) -> int:
+        # the map wraps like this : going off one edge re-enters on the other, so the shortest path may cross the wraparound point
         half_size = size // 2
         return (delta + half_size) % size - half_size
 
@@ -97,10 +99,11 @@ class Navigator:
 
     @staticmethod
     def move_toward_sound(k: int) -> Action:
-        # k -> sound direction from a broadcast (0=here, 1=front, 2..8 clockwise around the player)
-        # k == 0 -> player already arrived
+        # broadcast sound works like this : k=0 means we're on the emitter's tile, k=1 is straight
+        # ahead ; per the subject's diagram, 2..8 circle the player "trigonomically" (counter-
+        # clockwise) from there, so 2/3/4 land on our left and 6/7/8 on our right
         if k == 1:
             return Action.FORWARD
-        if k in (2, 3, 4, 5):
-            return Action.RIGHT
-        return Action.LEFT
+        if k in (2, 3, 4):
+            return Action.LEFT
+        return Action.RIGHT

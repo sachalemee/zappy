@@ -45,7 +45,7 @@ static void kill_player(server_t *s, int idx)
     char buf[64];
 
     write(c->fd, "dead\n", 5);
-    snprintf(buf, sizeof(buf), "pdi %d\n", c->player->id);
+    snprintf(buf, sizeof(buf), "pdi #%d\n", c->player->id);
     send_to_gui(s, buf);
     remove_dead_client(s, idx);
 }
@@ -65,5 +65,11 @@ void handle_famine(server_t *s)
             i--;
         } else if (curr >= c->player->next_meal_time)
             c->player->next_meal_time += get_action_duration(s->freq, 126);
+    }
+    for (int i = 0; i < s->nb_eggs; i++) {
+        if (s->eggs[i] && s->eggs[i]->hatched && curr >= s->eggs[i]->death_time) {
+            destroy_egg(s, s->eggs[i]->id);
+            i--;
+        }
     }
 }

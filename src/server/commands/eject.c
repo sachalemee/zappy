@@ -7,6 +7,8 @@
 
 #include "commands.h"
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
 
 static void move_player(server_t *s, player_t *p, int dir)
 {
@@ -21,18 +23,30 @@ static void move_player(server_t *s, player_t *p, int dir)
     gui_event_ppo(s, p);
 }
 
+static int get_eject_k(int pusher_ori, int victim_ori)
+{
+    int origin = (pusher_ori + 1) % 4 + 1;
+    int diff = origin - victim_ori;
+
+    if (diff < 0)
+        diff += 4;
+    return 1 + diff * 2;
+}
+
 static int push_players(server_t *s, player_t *p)
 {
     int pushed = 0;
-    client_t *o;
+    char buf[16];
 
     for (int i = 0; i < s->nb_clients; i++) {
-        o = s->clients[i];
+        client_t *o = s->clients[i];
         if (!o || o->type != CLIENT_AI || !o->player || o->player == p)
             continue;
         if (o->player->x == p->x && o->player->y == p->y) {
             move_player(s, o->player, p->orientation);
-            write(o->fd, "eject: 1\n", 9);
+            snprintf(buf, sizeof(buf), "eject: %d\n",
+                get_eject_k(p->orientation, o->player->orientation));
+            write(o->fd, buf, strlen(buf));
             pushed++;
         }
     }

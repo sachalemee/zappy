@@ -34,7 +34,7 @@ class GameState:
         self.inventory = Inventory()
         self.vision: list[Tile] = []
         self.incoming_call: tuple[int, int] | None = None # last incantation call heard (level, k), if any
-        self.egg_slots = 0 # unhatched eggs available, from last connect_nbr
+        self.known_free_slots = 0 # team's free egg slots, as last reported by the server via Connect_nbr
 
     def update_vision(self, tiles: list[Tile]) -> None:
         self.vision = tiles
@@ -48,17 +48,17 @@ class GameState:
         elif action == Action.LEFT:
             self.direction = (self.direction - 1) % 4
 
-    def _move_in_direction(self, direction: int) -> None:
+    def move_in_direction(self, direction: int) -> None:
+        # the map works like this : it's toroidal, exiting one edge wraps around to the opposite edge (modulo width/height)
         x, y = self.position
         dx, dy = DIRECTION_DELTAS[direction]
         self.position = ((x + dx) % self.map_width, (y + dy) % self.map_height)
 
     def apply_move(self) -> None:
-        self._move_in_direction(self.direction)
+        self.move_in_direction(self.direction)
 
     def apply_eject(self, k: int) -> None:
-        # k: relative push direction from the server ("eject: K"), same
-        # octant convention as broadcast sound direction (1=front..8)
+        # eject works like this : "eject: K" gives the relative tile (1-8) the push came from, same octant convention as broadcast sound
         if k in (8, 1, 2):
             relative = 0
         elif k in (3, 4):
@@ -67,7 +67,8 @@ class GameState:
             relative = 2
         else:
             relative = 3
-        self._move_in_direction((self.direction + relative) % 4)
+        self.move_in_direction((self.direction + relative) % 4)
 
     def current_tile(self) -> Tile | None:
+        # vision works like this : Look returns one tile per visible cell, vision[0] is always our own tile regardless of level/direction
         return self.vision[0] if self.vision else None
