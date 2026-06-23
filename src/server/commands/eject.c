@@ -27,10 +27,11 @@ static int get_eject_k(int pusher_ori, int victim_ori)
 {
     int origin = (pusher_ori + 1) % 4 + 1;
     int diff = origin - victim_ori;
+    int k_map[4] = {1, 7, 5, 3};
 
     if (diff < 0)
         diff += 4;
-    return 1 + diff * 2;
+    return k_map[diff];
 }
 
 static int push_players(server_t *s, player_t *p)
