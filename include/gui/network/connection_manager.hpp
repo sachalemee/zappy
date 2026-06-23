@@ -19,6 +19,7 @@ public:
     bool connect(const std::string &host, int port);
     void disconnect();
     void update(game_state &state);
+    bool sendCommand(const std::string &cmd) { return _net.sendLine(cmd); }
     bool isConnected() const { return _net.isConnected(); }
     bool isReady() const { return _isConnected; }
 
