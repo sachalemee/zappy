@@ -35,6 +35,7 @@ class GameState:
         self.vision: list[Tile] = []
         self.incoming_call: tuple[int, int] | None = None # last incantation call heard (level, k), if any
         self.known_free_slots = 0 # team's free egg slots, as last reported by the server via Connect_nbr
+        self.known_resources: dict[str, tuple[int, int]] = {} # resource -> absolute position last reported by a sibling
 
     def update_vision(self, tiles: list[Tile]) -> None:
         self.vision = tiles
