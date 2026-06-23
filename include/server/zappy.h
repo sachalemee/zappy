@@ -91,7 +91,6 @@ typedef struct egg_s {
     team_t *team;
     long long hatch_time;
     int hatched;
-    long long death_time;
 } egg_t;
 
 typedef struct server_s {
