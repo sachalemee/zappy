@@ -13,6 +13,7 @@ class Connection:
         self.port = port
         self.socket: socket.socket | None = None
         self._buffer = ""
+        self.closed_by_peer = False
 
     def connect(self) -> None:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,6 +26,7 @@ class Connection:
         while "\n" not in self._buffer:
             chunk = self.socket.recv(4096).decode()
             if not chunk:
+                self.closed_by_peer = True
                 return None
             self._buffer += chunk
         line, self._buffer = self._buffer.split("\n", 1)
