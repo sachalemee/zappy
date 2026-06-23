@@ -72,7 +72,10 @@ GUI_SRC         = $(addprefix src/gui/, \
                     gamecamera.cpp \
                     ZoomButtons.cpp \
                     SettingsButton.cpp \
-                    TeamList.cpp \
+                    TeamList/TeamList.cpp \
+                    TeamList/TeamListDraw.cpp \
+                    TeamList/TeamListGeometry.cpp \
+                    TeamList/TeamListNetwork.cpp \
                     renderer.cpp \
                     game/gamestate.cpp \
                 )
@@ -148,6 +151,18 @@ obj/gui/connection_manager.o:    src/gui/network/connection_manager.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 obj/gui/gamestate.o:    src/gui/game/gamestate.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/TeamList.o:    src/gui/TeamList/TeamList.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/TeamListDraw.o:    src/gui/TeamList/TeamListDraw.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/TeamListGeometry.o:    src/gui/TeamList/TeamListGeometry.cpp
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/TeamListNetwork.o:    src/gui/TeamList/TeamListNetwork.cpp
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 clean:
