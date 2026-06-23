@@ -73,15 +73,18 @@ class Navigator:
 
     def move_toward_ressource(self, game_state) -> Action:
         target = self.next_target(game_state)
+        return self.move_toward_position(game_state, target)
 
+    @classmethod
+    def move_toward_position(cls, game_state, target: tuple[int, int]) -> Action:
         if target == game_state.position:
             return Action.FORWARD
 
         x, y = game_state.position
         tx, ty = target
 
-        dx = self.shortest_delta(tx - x, game_state.map_width)
-        dy = self.shortest_delta(ty - y, game_state.map_height)
+        dx = cls.shortest_delta(tx - x, game_state.map_width)
+        dy = cls.shortest_delta(ty - y, game_state.map_height)
 
         if dx > 0:
             wanted_direction = 1

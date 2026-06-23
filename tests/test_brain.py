@@ -282,6 +282,12 @@ class TestHandlePushedLines(unittest.TestCase):
         brain = make_brain(level=2)
         self.assertFalse(brain.handle_broadcast("dead"))
 
+    def test_handle_broadcast_stores_resource_report(self):
+        brain = make_brain(level=1)
+        line = f"message 6, {Coordinator.encode_resource_report('team1', 'sibur', 2, 9)}"
+        self.assertTrue(brain.handle_broadcast(line))
+        self.assertEqual(brain.state.known_resources["sibur"], (2, 9))
+
     def test_handle_eject_moves_the_player(self):
         brain = make_brain()
         self.assertTrue(brain.handle_eject("eject: 1"))
@@ -291,6 +297,51 @@ class TestHandlePushedLines(unittest.TestCase):
         brain = make_brain(level=3)
         self.assertTrue(brain.handle_level_up("Current level: 4"))
         self.assertEqual(brain.state.level, 4)
+
+
+class TestResourceSharing(unittest.TestCase):
+    def test_broadcasts_a_newly_seen_stone(self):
+        # deraumere isn't needed at level 1 and we already hold the one we'd ever
+        # want, so gathering won't claim it itself ; the surplus on the ground gets
+        # reported to siblings instead
+        brain = make_brain(level=1)
+        brain.state.position = (3, 4)
+        brain.state.inventory.items["deraumere"] = 1
+        brain.state.current_tile().resources["deraumere"] = 2
+        action = brain.decide()
+        self.assertEqual(action, Action.BROADCAST)
+        self.assertEqual(
+            brain.next_argument,
+            Coordinator.encode_resource_report("team1", "deraumere", 3, 4),
+        )
+        self.assertEqual(brain._reported_resources["deraumere"], (3, 4))
+
+    def test_does_not_re_broadcast_the_same_spot(self):
+        brain = make_brain(level=1)
+        brain.state.inventory.items["deraumere"] = 1
+        brain.state.current_tile().resources["deraumere"] = 2
+        brain.decide() # first call : broadcasts the discovery
+        brain._ticks_since_look = 0 # bypass the periodic poll again for this tick
+        action = brain.decide()
+        self.assertNotEqual(action, Action.BROADCAST)
+
+    def test_navigates_toward_a_known_resource_when_idle(self):
+        brain = make_brain(level=1) # needs 1 linemate, has none
+        brain.state.known_resources["linemate"] = (7, 2)
+        self.assertEqual(brain.decide(), Action.LEFT) # per move_toward_position toward (7, 2)
+
+    def test_drops_stale_known_resource_once_arrived(self):
+        brain = make_brain(level=1)
+        brain.state.known_resources["linemate"] = (0, 0) # our own position, already empty
+        brain.decide()
+        self.assertNotIn("linemate", brain.state.known_resources)
+
+    def test_ignores_a_known_resource_already_satisfied(self):
+        brain = make_brain(level=1) # level 1 has no use for thystame
+        brain.state.inventory.items["thystame"] = 1 # already holding one, target is 1
+        brain.state.known_resources["thystame"] = (7, 2)
+        brain.decide()
+        self.assertEqual(brain.state.known_resources["thystame"], (7, 2)) # left untouched, not chased
 
 
 if __name__ == "__main__":

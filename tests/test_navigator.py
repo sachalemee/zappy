@@ -150,5 +150,26 @@ class TestMoveTowardRessource(unittest.TestCase):
         self.assertEqual(self._move(nav, state, (5, 4)), Action.LEFT) # North, behind us
 
 
+class TestMoveTowardPosition(unittest.TestCase):
+    def test_forward_when_target_is_current_position(self):
+        state = GameState(10, 10, "team1")
+        state.position = (5, 5)
+        state.direction = NORTH
+        self.assertEqual(Navigator.move_toward_position(state, (5, 5)), Action.FORWARD)
+
+    def test_turns_toward_an_absolute_target(self):
+        state = GameState(10, 10, "team1")
+        state.position = (5, 5)
+        state.direction = NORTH
+        self.assertEqual(Navigator.move_toward_position(state, (6, 5)), Action.RIGHT) # East
+
+    def test_wraps_around_map_edges(self):
+        state = GameState(10, 10, "team1")
+        state.position = (0, 0)
+        state.direction = EAST
+        # shortest path to x=9 on a width-10 map is West (wraparound), not East
+        self.assertEqual(Navigator.move_toward_position(state, (9, 0)), Action.LEFT)
+
+
 if __name__ == "__main__":
     unittest.main(testRunner=ColorTextTestRunner)
