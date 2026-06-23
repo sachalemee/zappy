@@ -247,7 +247,7 @@ void renderer::drawPlayerLevels(const game_state &state, const Camera3D &cam) co
     }
 }
 
-void renderer::draw(const game_state &state, const Camera3D &cam) const
+void renderer::draw(const game_state &state, const Camera3D &cam)
 {
     float phase = std::fmod(GetTime(), 60.0f) / 60.0f;
     float light = (std::sin(phase * 2.0f * PI) + 1.0f) / 2.0f;

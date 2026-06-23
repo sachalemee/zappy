@@ -17,7 +17,7 @@ class renderer {
 public:
     renderer();
     ~renderer();
-    void draw(const game_state &state, const Camera3D &cam) const;
+    void draw(const game_state &state, const Camera3D &cam);
 private:
     void drawTiles(const game_state &state) const;
     void drawTile(int x, int y) const;
@@ -30,7 +30,8 @@ private:
     void drawGround(const game_state &state, float light, const Camera3D &cam) const;
     void drawCelestials(const game_state &state, float phase) const;
     float _islandScale = 1.0f;
-    
+    bool _showLevels = true;
+
     Model _ingotModel;
     Model _breadModel;
     Model _beanModel;
