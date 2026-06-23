@@ -22,7 +22,6 @@ egg_t *spawn_egg(server_t *s, client_t *c)
     egg->team = c->player->team;
     egg->hatched = 0;
     egg->hatch_time = get_current_time() + get_action_duration(s->freq, 600);
-    egg->death_time = 0;
     tmp = realloc(s->eggs, sizeof(egg_t *) * (s->nb_eggs + 1));
     if (!tmp) {
         free(egg);
@@ -44,7 +43,6 @@ void handle_eggs(server_t *s)
             continue;
         if (current >= egg->hatch_time) {
             egg->hatched = 1;
-            egg->death_time = current + get_action_duration(s->freq, 1260);
             egg->team->free_slots++;
             gui_event_eht(s, egg->id);
         }
@@ -84,7 +82,6 @@ static void add_initial_egg(server_t *s, int team_idx)
     e->team = &s->teams[team_idx];
     e->hatched = 1;
     e->hatch_time = 0;
-    e->death_time = get_current_time() + get_action_duration(s->freq, 1260);
     tmp = realloc(s->eggs, sizeof(egg_t *) * (s->nb_eggs + 1));
     if (!tmp) {
         free(e);

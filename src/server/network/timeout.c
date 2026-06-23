@@ -34,11 +34,8 @@ static void check_egg_timeout(server_t *s, long long curr, long long *min)
     long long d;
 
     for (int i = 0; i < s->nb_eggs; i++) {
-        if (!s->eggs[i]) continue;
-        if (!s->eggs[i]->hatched)
-            d = s->eggs[i]->hatch_time - curr;
-        else
-            d = s->eggs[i]->death_time - curr;
+        if (!s->eggs[i] || s->eggs[i]->hatched) continue;
+        d = s->eggs[i]->hatch_time - curr;
         if (d < 0) d = 0;
         if (*min == -1 || d < *min) *min = d;
     }
