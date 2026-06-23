@@ -39,15 +39,16 @@ float Settings::getSensitivity() const
 
 void Settings::drawKeyRow(float x, float y, const char *key, const char *label)
 {
-    Rectangle box = {x, y, 44, 44};
+    int kw = MeasureText(key, 24);
+    float boxWidth = kw + 20 > 44 ? kw + 20 : 44;
+    Rectangle box = {x, y, boxWidth, 44};
+
     DrawRectangleRounded(box, 0.25f, 6, Color{45, 48, 58, 255});
     DrawRectangleLinesEx(box, 2, Color{80, 84, 96, 255});
-
-    int kw = MeasureText(key, 24);
-    DrawText(key, static_cast<int>(x) + (44 - kw) / 2,
+    DrawText(key, static_cast<int>(x) + (static_cast<int>(boxWidth) - kw) / 2,
          static_cast<int>(y) + 10, 24, RAYWHITE);
-    DrawText(label, static_cast<int>
-            (x) + 58, static_cast<int>(y) + 12, 22, LIGHTGRAY);
+    DrawText(label, static_cast<int>(x) + static_cast<int>(boxWidth) + 14,
+            static_cast<int>(y) + 12, 22, LIGHTGRAY);
 }
 
 void Settings::drawOverlay()
@@ -57,7 +58,7 @@ void Settings::drawOverlay()
 
 void Settings::drawPanel()
 {
-    float pw = 760, ph = 470;
+    float pw = 760, ph = 500;
 
     _panel = {(GetScreenWidth() - pw) / 2.0f,
             (GetScreenHeight() - ph) / 2.0f, pw, ph};
@@ -100,6 +101,7 @@ void Settings::drawMovementKeys()
     drawKeyRow(x, y + 120, "D", "Right");
     drawKeyRow(x, y + 180, "Q", "Left");
     drawKeyRow(x, y + 240, "X", "(Un)lock");
+    drawKeyRow(x, y + 300, "Tab", "Team list");
 }
 
 void Settings::drawSensitivity()
@@ -152,7 +154,7 @@ void Settings::drawWindowMode()
     float x = _panel.x + 380;
     float y = _panel.y + 110;
 
-    Rectangle btn = {x, y + 220, 220, 46};
+    Rectangle btn = {x, y + 300, 220, 46};
     bool over = CheckCollisionPointRec(GetMousePosition(), btn);
 
     DrawRectangleRounded(btn, 0.3f, 6, over ?
@@ -166,6 +168,14 @@ void Settings::drawWindowMode()
         ToggleFullscreen();
         _fullscreen = !_fullscreen;
     }
+}
+
+void Settings::drawMiscKeys()
+{
+    float x = _panel.x + 380;
+    float y = _panel.y + 110;
+
+    drawKeyRow(x, y + 220, "L", "Show/hide levels");
 }
 
 void Settings::handleOutsideClick()
@@ -188,6 +198,7 @@ void Settings::draw()
     drawSensitivity();
     drawElevationKeys();
     drawWindowMode();
+    drawMiscKeys();
     handleOutsideClick();
 
     _justOpened = false;
