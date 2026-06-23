@@ -10,6 +10,7 @@ import unittest
 from src.ai.algo.navigator import Navigator
 from src.ai.game.state import GameState, NORTH, EAST, SOUTH
 from src.ai.strategy.actions import Action
+from tests.colors import ColorTextTestRunner
 
 
 class TestNeighbors(unittest.TestCase):
@@ -150,4 +151,4 @@ class TestMoveTowardRessource(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(testRunner=ColorTextTestRunner)
