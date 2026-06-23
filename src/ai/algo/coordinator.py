@@ -30,9 +30,7 @@ class Coordinator:
 
     @staticmethod
     def encode_resource_report(team_name: str, resource: str, x: int, y: int) -> str:
-        # broadcast only conveys a direction relative to the listener, not the speaker's
-        # position ; embedding our own absolute coordinates lets listeners compare against
-        # their own known position instead
+        # broadcast only conveys a direction relative to the listener not the speaker
         return f"{INCANT_TAG};{team_name};{RESOURCE_TYPE};{resource};{x};{y}"
 
     @staticmethod
