@@ -9,6 +9,7 @@
 
 INCANT_TAG = "ZAPPY"
 INCANT_TYPE = "INCANT"
+RESOURCE_TYPE = "RESOURCE"
 
 class Coordinator:
     @staticmethod
@@ -24,6 +25,25 @@ class Coordinator:
             return None
         try:
             return int(parts[3])
+        except ValueError:
+            return None
+
+    @staticmethod
+    def encode_resource_report(team_name: str, resource: str, x: int, y: int) -> str:
+        # broadcast only conveys a direction relative to the listener, not the speaker's
+        # position ; embedding our own absolute coordinates lets listeners compare against
+        # their own known position instead
+        return f"{INCANT_TAG};{team_name};{RESOURCE_TYPE};{resource};{x};{y}"
+
+    @staticmethod
+    def parse_resource_report(team_name: str, text: str) -> tuple[str, int, int] | None:
+        parts = text.strip().split(";")
+        if len(parts) != 6 or parts[0] != INCANT_TAG or parts[2] != RESOURCE_TYPE:
+            return None
+        if parts[1] != team_name:
+            return None
+        try:
+            return parts[3], int(parts[4]), int(parts[5])
         except ValueError:
             return None
 
