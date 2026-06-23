@@ -116,16 +116,6 @@ class Brain:
             return self.navigator.move_toward_ressource(self.state)
 
         if tile:
-            for resource, quantity in tile.resources.items():
-                if resource == "food" or quantity <= 0:
-                    continue
-                if self._reported_resources.get(resource) == self.state.position:
-                    continue
-                self._reported_resources[resource] = self.state.position
-                self.next_argument = Coordinator.encode_resource_report(
-                    self.state.team_name, resource, *self.state.position)
-                return Action.BROADCAST
-
             bag_missing = missing_resources(self.state.level, self.state.inventory.items)
             bag_complete = not any(amount > 0 for amount in bag_missing.values())
 
@@ -170,6 +160,17 @@ class Brain:
                 del self.state.known_resources[resource] # we're here and it's gone ; was either ours or already taken
             else:
                 return Navigator.move_toward_position(self.state, position)
+
+        if tile:
+            for resource, quantity in tile.resources.items():
+                if resource == "food" or quantity <= 0:
+                    continue
+                if self._reported_resources.get(resource) == self.state.position:
+                    continue
+                self._reported_resources[resource] = self.state.position
+                self.next_argument = Coordinator.encode_resource_report(
+                    self.state.team_name, resource, *self.state.position)
+                return Action.BROADCAST
 
         return self.navigator.move_toward_ressource(self.state)
 
