@@ -28,9 +28,11 @@ private:
             const Player &player) const;
     void drawTeamPanel(const game_state &state) const;
     void drawPlayerPanel(const game_state &state) const;
-    void drawBackButton(float panelX, float panelY) const;
+    void drawBackButton(Rectangle box) const;
     int countPlayersInTeam(const std::vector<Player> &players,
             const std::string &team) const;
+    Rectangle teamPanelRect(const game_state &state) const;
+    Rectangle playerPanelRect(const game_state &state) const;
     Rectangle teamRowRect(const game_state &state, size_t index) const;
     Rectangle backButtonRect(const game_state &state) const;
     void requestInventories(const game_state &state,
