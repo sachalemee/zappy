@@ -25,6 +25,7 @@ private:
     void drawTileResources(int x, int y, const game_state &state) const;
     void drawEggs(const game_state &state) const;
     void drawPlayers(const game_state &state) const;
+    void drawPlayerLevels(const game_state &state, const Camera3D &cam) const;
     void drawResource(int i, Vector3 pos) const;
     void drawSky(float light) const;
     void drawGround(const game_state &state, float light, const Camera3D &cam) const;
