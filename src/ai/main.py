@@ -59,6 +59,12 @@ def main(argv: list[str] = sys.argv) -> None:
             if action in (Action.FORWARD, Action.LEFT, Action.RIGHT, Action.EJECT):
                 log(f"state: pos={state.position} dir={state.direction} level={state.level}")
 
+        if connection.closed_by_peer:
+            # the server closes every client's socket on shutdown, win or not ; same
+            # graceful exit as "dead", just without that explicit message first
+            log("server closed the connection")
+            return
+
         if state.known_free_slots > 0:
             # known_free_slots is resynced from the server every CONNECT_NBR_POLL_INTERVAL ticks,
             # so this self-correcting decrement never drifts permanently out of sync ; if several

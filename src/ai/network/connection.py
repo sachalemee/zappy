@@ -20,11 +20,19 @@ class Connection:
         self.socket.connect((self.machine, self.port))
 
     def send(self, line: str) -> None:
-        self.socket.sendall((line + "\n").encode())
+        if self.closed_by_peer:
+            return
+        try:
+            self.socket.sendall((line + "\n").encode())
+        except ConnectionError:
+            self.closed_by_peer = True
 
     def receive_line(self) -> str | None:
         while "\n" not in self._buffer:
-            chunk = self.socket.recv(4096).decode()
+            try:
+                chunk = self.socket.recv(4096).decode()
+            except ConnectionError:
+                chunk = ""
             if not chunk:
                 self.closed_by_peer = True
                 return None
