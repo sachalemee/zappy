@@ -231,7 +231,23 @@ void renderer::drawPlayers(const game_state &state) const
     }
 }
 
-void renderer::draw(const game_state &state, const Camera3D &cam) const
+void renderer::drawPlayerLevels(const game_state &state, const Camera3D &cam) const
+{
+    const std::vector<Player> &players = state.players();
+
+    for (size_t i = 0; i < players.size(); i++) {
+        Vector3 pos = {static_cast<float>(players[i].x), 1.0f,
+            static_cast<float>(players[i].y)};
+        Vector2 screen = GetWorldToScreen(pos, cam);
+        const char *text = TextFormat("Lv.%d", players[i].level);
+        int width = MeasureText(text, 18);
+
+        DrawText(text, static_cast<int>(screen.x) - width / 2,
+            static_cast<int>(screen.y), 18, YELLOW);
+    }
+}
+
+void renderer::draw(const game_state &state, const Camera3D &cam)
 {
     float phase = std::fmod(GetTime(), 60.0f) / 60.0f;
     float light = (std::sin(phase * 2.0f * PI) + 1.0f) / 2.0f;
@@ -249,4 +265,8 @@ void renderer::draw(const game_state &state, const Camera3D &cam) const
     drawEggs(state);
     drawPlayers(state);
     EndMode3D();
+    if (IsKeyPressed(KEY_L))
+        _showLevels = !_showLevels;
+    if (_showLevels)
+        drawPlayerLevels(state, cam);
 }
