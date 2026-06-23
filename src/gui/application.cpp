@@ -38,7 +38,7 @@ void application::updateGame()
     if (!_settings.isOpen())
         _camera.update(50.0f);
     if (!_settings.isOpen())
-        _teamList.update(_state);
+        _teamList.update(_state, _connection);
     _renderer.draw(_state, _camera.get());
     _zoomButtons.draw(_camera);
     _settingsButton.draw(_settings);

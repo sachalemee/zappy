@@ -24,6 +24,7 @@ struct Player {
     int orientation = 1;
     int level = 1;
     std::string team;
+    int inventory[7] = {0, 0, 0, 0, 0, 0, 0};
 };
 
 struct Egg {
@@ -52,6 +53,7 @@ private:
     void parseNewPlayer(std::istringstream &args);
     void parsePlayerPosition(std::istringstream &args);
     void parsePlayerLevel(std::istringstream &args);
+    void parsePlayerInventory(std::istringstream &args);
     void parsePlayerDeath(std::istringstream &args);
     void parseNewEgg(std::istringstream &args);
     void parseEggRemoval(std::istringstream &args);
