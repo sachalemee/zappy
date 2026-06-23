@@ -24,18 +24,16 @@ static void gui_pin(server_t *s, client_t *c, int id)
     player_t *p = find_player(s, id);
     char buf[256];
 
-    if (!p)
+    if (!p) {
+        write(c->fd, "sbp\n", 4);
         return;
-
+    }
     snprintf(buf, sizeof(buf),
-        "pin #%d %d %d %d %d %d %d %d\n",
-        p->id,
-        p->inventory[FOOD],
-        p->inventory[LINEMATE],
-        p->inventory[DERAUMERE],
-        p->inventory[SIBUR],
-        p->inventory[MENDIANE],
-        p->inventory[PHIRAS],
+        "pin #%d %d %d %d %d %d %d %d %d %d\n",
+        p->id, p->x, p->y,
+        p->inventory[FOOD], p->inventory[LINEMATE],
+        p->inventory[DERAUMERE], p->inventory[SIBUR],
+        p->inventory[MENDIANE], p->inventory[PHIRAS],
         p->inventory[THYSTAME]);
     write(c->fd, buf, strlen(buf));
 }
@@ -45,8 +43,10 @@ static void gui_plv(server_t *s, client_t *c, int id)
     player_t *p = find_player(s, id);
     char buf[128];
 
-    if (!p)
+    if (!p) {
+        write(c->fd, "sbp\n", 4);
         return;
+    }
     snprintf(buf, sizeof(buf), "plv #%d %d\n", p->id, p->level);
     write(c->fd, buf, strlen(buf));
 }
@@ -56,8 +56,10 @@ static void gui_ppo(server_t *s, client_t *c, int id)
     player_t *p = find_player(s, id);
     char buf[128];
 
-    if (!p)
+    if (!p) {
+        write(c->fd, "sbp\n", 4);
         return;
+    }
     snprintf(buf, sizeof(buf), "ppo #%d %d %d %d\n", p->id, p->x, p->y, p->orientation);
     write(c->fd, buf, strlen(buf));
 }

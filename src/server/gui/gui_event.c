@@ -47,14 +47,11 @@ void gui_event_pin(server_t *s, player_t *p)
     char buf[256];
 
     snprintf(buf, sizeof(buf),
-        "pin #%d %d %d %d %d %d %d %d\n",
-        p->id,
-        p->inventory[FOOD],
-        p->inventory[LINEMATE],
-        p->inventory[DERAUMERE],
-        p->inventory[SIBUR],
-        p->inventory[MENDIANE],
-        p->inventory[PHIRAS],
+        "pin #%d %d %d %d %d %d %d %d %d %d\n",
+        p->id, p->x, p->y,
+        p->inventory[FOOD], p->inventory[LINEMATE],
+        p->inventory[DERAUMERE], p->inventory[SIBUR],
+        p->inventory[MENDIANE], p->inventory[PHIRAS],
         p->inventory[THYSTAME]);
     send_to_gui(s, buf);
 }
@@ -93,9 +90,21 @@ void gui_event_pbc(server_t *s, player_t *p, const char *msg)
 
 void gui_event_pic(server_t *s, player_t *p)
 {
-    char buf[128];
+    char buf[256];
+    int len;
+    client_t *o;
 
-    snprintf(buf, sizeof(buf), "pic %d %d %d #%d\n", p->x, p->y, p->level, p->id);
+    len = snprintf(buf, sizeof(buf), "pic %d %d %d", p->x, p->y, p->level);
+    for (int i = 0; i < s->nb_clients; i++) {
+        o = s->clients[i];
+        if (o && o->type == CLIENT_AI && o->player &&
+            o->player->x == p->x && o->player->y == p->y &&
+            o->player->level == p->level) {
+            len += snprintf(buf + len, sizeof(buf) - len, " #%d",
+                o->player->id);
+        }
+    }
+    snprintf(buf + len, sizeof(buf) - len, "\n");
     gui_send(s, buf);
 }
 

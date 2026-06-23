@@ -63,7 +63,7 @@ static void finish_command(client_t *c)
 {
     const cmd_map_t *cmd;
     long long current = get_current_time();
- 
+
     if (c->nb_cmds == 0 || c->action_end_time == 0 || 
         current < c->action_end_time)
         return;
@@ -89,7 +89,8 @@ void handle_active_commands(server_t *s)
             cmd = c->cmds[0];
             if (strncmp(cmd, "mct", 3) == 0 ||
                 strncmp(cmd, "bct", 3) == 0 ||
-                strncmp(cmd, "sgt", 3) == 0) {
+                strncmp(cmd, "sgt", 3) == 0 ||
+                strncmp(cmd, "tna", 3) == 0) {
                 handle_gui_command(s, c);
             } else if (strncmp(cmd, "pin", 3) == 0 ||
                      strncmp(cmd, "plv", 3) == 0 ||
@@ -103,7 +104,7 @@ void handle_active_commands(server_t *s)
         }
         if (c->state != STATE_IN_GAME)
             continue;
-        start_command(c);
         finish_command(c);
+        start_command(c);
     }
 }

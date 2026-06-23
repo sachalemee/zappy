@@ -26,7 +26,6 @@ void cmd_fork(server_t *s, client_t *c)
     egg_t *egg = spawn_egg(s, c);
     if (!egg)
         return;
-    c->player->team->free_slots++;
     gui_event_enw(s, egg->id, c->player);
     write(c->fd, "ok\n", 3);
 }
