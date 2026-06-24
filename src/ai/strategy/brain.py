@@ -37,6 +37,7 @@ class Brain:
         self._last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
         self._broadcast_cooldown = 0
         self._broadcast_attempts = 0 # consecutive Broadcasts sent with nobody showing up
+        self._last_players_here = 1 # players_here as of the last BROADCAST tick, to detect a sibling joining
         self._just_gave_up = False # reclaimed our stones after giving up ; walk away before trying this spot again
         self._reported_resources: dict[str, tuple[int, int]] = {} # resource -> position we last broadcast it from, so we don't repeat every tick
         self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
@@ -66,6 +67,7 @@ class Brain:
 
         if self.fsm.state != State.BROADCAST:
             self._broadcast_attempts = 0 # left the state (joined someone, leveled up...) ; start fresh next time
+            self._last_players_here = 1
 
         tile = self.state.current_tile()
         # eject works like this : pushes everyone else off the tile (and destroys their eggs there); only outside of GATHER/INCANTATE/BROADCAST so we never eject players we actually want to elevate with
@@ -81,7 +83,15 @@ class Brain:
         if self.fsm.state == State.FORK:
             return Action.FORK # lays an egg, adds one free slot to the team
         if self.fsm.state == State.BROADCAST:
-            if self._broadcast_attempts >= BROADCAST_GIVEUP_LIMIT:
+            players_here = tile.players_here if tile else 1
+            if players_here > self._last_players_here:
+                # a sibling just joined ; progress is being made, don't abandon the spot
+                self._broadcast_attempts = 0
+            self._last_players_here = players_here
+            # the more players a level needs, the longer it's worth waiting for them to arrive
+            required_players = INCANTATION_REQUIREMENTS.get(self.state.level, {}).get("players", 1)
+            giveup_limit = BROADCAST_GIVEUP_LIMIT * required_players
+            if self._broadcast_attempts >= giveup_limit:
                 # nobody's coming ; give up on this spot and fall through to the gather
                 # logic below, which will pick our own dropped stones back up since
                 # they're sitting right here and our bag is short of them again
