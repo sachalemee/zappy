@@ -19,6 +19,7 @@
 #include "settings.hpp"
 #include "TeamList.hpp"
 #include "audio/audio_manager.hpp"
+#include "effects/particle_system.hpp"
 #include <string>
 
 class application {
@@ -33,6 +34,7 @@ private:
 
     Window _window;
     AudioManager _audio;
+    ParticleSystem _particles;
     Menu _menu;
     connection_manager _connection;
     game_state _state;

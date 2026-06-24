@@ -37,6 +37,13 @@ float Settings::getSensitivity() const
     return _sensitivity;
 }
 
+Color Settings::hoverColor(bool over, Color base, Color hover) const
+{
+    if (over)
+        return hover;
+    return base;
+}
+
 void Settings::drawKeyRow(float x, float y, const char *key, const char *label)
 {
     int kw = MeasureText(key, 24);
@@ -58,7 +65,7 @@ void Settings::drawOverlay()
 
 void Settings::drawPanel()
 {
-    float pw = 760, ph = 500;
+    float pw = 760, ph = 600;
 
     _panel = {(GetScreenWidth() - pw) / 2.0f,
             (GetScreenHeight() - ph) / 2.0f, pw, ph};
@@ -178,6 +185,56 @@ void Settings::drawMiscKeys()
     drawKeyRow(x, y + 220, "L", "Show/hide levels");
 }
 
+void Settings::drawFrequencyButtons(Rectangle minus, Rectangle plus,
+        int freq, float x, float y)
+{
+    Color minusColor = hoverColor(
+            CheckCollisionPointRec(GetMousePosition(), minus),
+            Color{50, 54, 64, 255}, Color{70, 74, 86, 255});
+    Color plusColor = hoverColor(
+            CheckCollisionPointRec(GetMousePosition(), plus),
+            Color{50, 54, 64, 255}, Color{70, 74, 86, 255});
+
+    DrawText("Frequency", static_cast<int>(x), static_cast<int>(y), 22,
+            RAYWHITE);
+    DrawText(TextFormat("%d", freq), static_cast<int>(x) + 150,
+            static_cast<int>(y), 22, RAYWHITE);
+
+    DrawRectangleRounded(minus, 0.25f, 6, minusColor);
+    DrawRectangleLinesEx(minus, 2, Color{80, 84, 96, 255});
+    DrawText("-", static_cast<int>(minus.x) + 13,
+            static_cast<int>(minus.y) + 4, 24, RAYWHITE);
+
+    DrawRectangleRounded(plus, 0.25f, 6, plusColor);
+    DrawRectangleLinesEx(plus, 2, Color{80, 84, 96, 255});
+    DrawText("+", static_cast<int>(plus.x) + 10,
+            static_cast<int>(plus.y) + 4, 24, RAYWHITE);
+}
+
+void Settings::handleFrequencyClick(Rectangle minus, Rectangle plus, int freq,
+        connection_manager &connection)
+{
+    if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || _justOpened)
+        return;
+    if (CheckCollisionPointRec(GetMousePosition(), minus) && freq > 1)
+        connection.sendCommand("sst " + std::to_string(freq - 1) + "\n");
+    else if (CheckCollisionPointRec(GetMousePosition(), plus))
+        connection.sendCommand("sst " + std::to_string(freq + 1) + "\n");
+}
+
+void Settings::drawFrequency(const game_state &state,
+        connection_manager &connection)
+{
+    float x = _panel.x + 40;
+    float y = _panel.y + 110 + 380;
+    int freq = state.timeUnit();
+    Rectangle minus = {x + 220, y - 6, 36, 36};
+    Rectangle plus = {x + 264, y - 6, 36, 36};
+
+    drawFrequencyButtons(minus, plus, freq, x, y);
+    handleFrequencyClick(minus, plus, freq, connection);
+}
+
 void Settings::handleOutsideClick()
 {
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !_justOpened
@@ -185,11 +242,8 @@ void Settings::handleOutsideClick()
         close();
 }
 
-void Settings::draw()
+void Settings::drawBody()
 {
-    if (!_open)
-        return;
-
     drawOverlay();
     drawPanel();
     drawTitle();
@@ -200,6 +254,21 @@ void Settings::draw()
     drawWindowMode();
     drawMiscKeys();
     handleOutsideClick();
+}
 
+void Settings::draw()
+{
+    if (!_open)
+        return;
+    drawBody();
+    _justOpened = false;
+}
+
+void Settings::draw(const game_state &state, connection_manager &connection)
+{
+    if (!_open)
+        return;
+    drawBody();
+    drawFrequency(state, connection);
     _justOpened = false;
 }

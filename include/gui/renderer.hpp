@@ -9,6 +9,7 @@
 #define RENDERER_HPP_
 
 #include "game/gamestate.hpp"
+#include "effects/particle_system.hpp"
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
@@ -17,7 +18,8 @@ class renderer {
 public:
     renderer();
     ~renderer();
-    void draw(const game_state &state, const Camera3D &cam);
+    void draw(const game_state &state, const Camera3D &cam,
+        const ParticleSystem &particles);
 private:
     void drawTiles(const game_state &state) const;
     void drawTile(int x, int y) const;
@@ -26,12 +28,14 @@ private:
     void drawEggs(const game_state &state) const;
     void drawPlayers(const game_state &state) const;
     void drawPlayerLevels(const game_state &state, const Camera3D &cam) const;
+    void drawElapsedTime(const game_state &state);
     void drawResource(int i, Vector3 pos) const;
     void drawSky(float light) const;
     void drawGround(const game_state &state, float light, const Camera3D &cam) const;
     void drawCelestials(const game_state &state, float phase) const;
     float _islandScale = 1.0f;
     bool _showLevels = true;
+    double _gameElapsed = 0.0;
 
     Model _ingotModel;
     Model _breadModel;
