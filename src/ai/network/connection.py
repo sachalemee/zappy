@@ -12,7 +12,7 @@ class Connection:
         self.machine = machine
         self.port = port
         self.socket: socket.socket | None = None
-        self._buffer = ""
+        self.buffer = ""
         self.closed_by_peer = False
 
     def connect(self) -> None:
@@ -28,7 +28,7 @@ class Connection:
             self.closed_by_peer = True
 
     def receive_line(self) -> str | None:
-        while "\n" not in self._buffer:
+        while "\n" not in self.buffer:
             try:
                 chunk = self.socket.recv(4096).decode()
             except ConnectionError:
@@ -36,8 +36,8 @@ class Connection:
             if not chunk:
                 self.closed_by_peer = True
                 return None
-            self._buffer += chunk
-        line, self._buffer = self._buffer.split("\n", 1)
+            self.buffer += chunk
+        line, self.buffer = self.buffer.split("\n", 1)
         return line.strip()
 
     def close(self) -> None:
