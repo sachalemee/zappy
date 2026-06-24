@@ -141,12 +141,36 @@ class TestBroadcastGiveUp(unittest.TestCase):
     def test_gives_up_after_the_attempt_limit_and_reclaims_its_stones(self):
         from src.ai.strategy.brain import BROADCAST_GIVEUP_LIMIT
         brain = self._setup_broadcasting()
-        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT
+        # level 2 needs 2 players, so the effective limit is scaled by that
+        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT * 2
         action = brain.decide()
         self.assertTrue(brain._just_gave_up)
         # falls through to the gather logic, which picks our own dropped stone back up
         self.assertEqual(action, Action.TAKE)
         self.assertEqual(brain._broadcast_attempts, 0)
+
+    def test_does_not_give_up_early_when_more_players_are_required(self):
+        from src.ai.strategy.brain import BROADCAST_GIVEUP_LIMIT
+        brain = make_brain(level=4)
+        tile = brain.state.current_tile()
+        tile.resources.update({"linemate": 1, "deraumere": 1, "sibur": 2, "phiras": 1})
+        tile.players_here = 1 # alone : level 4 needs 4
+        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT # would have given up for level 2
+        self.assertEqual(brain.decide(), Action.BROADCAST)
+        self.assertFalse(brain._just_gave_up)
+
+    def test_resets_attempts_when_a_sibling_joins(self):
+        from src.ai.strategy.brain import BROADCAST_GIVEUP_LIMIT
+        brain = make_brain(level=4)
+        tile = brain.state.current_tile()
+        tile.resources.update({"linemate": 1, "deraumere": 1, "sibur": 2, "phiras": 1})
+        tile.players_here = 1
+        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT * 4 - 1 # one tick away from giving up
+        brain.decide() # records players_here=1 as the baseline
+        tile.players_here = 2 # a sibling just arrived
+        brain.decide()
+        self.assertEqual(brain._broadcast_attempts, 0)
+        self.assertFalse(brain._just_gave_up)
 
 
 class TestGather(unittest.TestCase):
