@@ -6,14 +6,26 @@
 */
 
 #include "game/gamestate.hpp"
+#include <cctype>
 #include <sstream>
 #include <unordered_map>
 
+static bool isNumeric(const std::string &digits)
+{
+    if (digits.empty())
+        return false;
+    for (char c : digits)
+        if (!std::isdigit(static_cast<unsigned char>(c)))
+            return false;
+    return true;
+}
+
 int game_state::extractId(const std::string &token)
 {
-    if (token.size() > 1 && token[0] == '#')
-        return std::stoi(token.substr(1));
-    return std::stoi(token);
+    std::string digits = (token.size() > 1 && token[0] == '#')
+        ? token.substr(1) : token;
+
+    return isNumeric(digits) ? std::stoi(digits) : -1;
 }
 
 void game_state::reset()
