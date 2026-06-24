@@ -42,7 +42,7 @@ void application::updateGame()
     _renderer.draw(_state, _camera.get());
     _zoomButtons.draw(_camera);
     _settingsButton.draw(_settings);
-    _settings.draw();
+    _settings.draw(_state, _connection);
     _teamList.draw(_state);
 }
  

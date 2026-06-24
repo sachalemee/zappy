@@ -40,6 +40,7 @@ public:
     bool ready() const { return _width > 0 && _height > 0; }
     int width() const { return _width; }
     int height() const { return _height; }
+    int timeUnit() const { return _timeUnit; }
     const Tile &tile(int x, int y) const { return _tiles[y * _width + x]; }
     const std::vector<Player> &players() const { return _players; }
     const std::vector<Egg> &eggs() const { return _eggs; }

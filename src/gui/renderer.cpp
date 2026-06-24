@@ -247,6 +247,26 @@ void renderer::drawPlayerLevels(const game_state &state, const Camera3D &cam) co
     }
 }
 
+void renderer::drawElapsedTime(const game_state &state)
+{
+    const double baseFreq = 100.0;
+    int elapsed;
+    int minutes;
+    int seconds;
+    const char *text;
+    int width;
+
+    if (!state.ready())
+        return;
+    _gameElapsed += GetFrameTime() * (state.timeUnit() / baseFreq);
+    elapsed = static_cast<int>(_gameElapsed);
+    minutes = elapsed / 60;
+    seconds = elapsed % 60;
+    text = TextFormat("%02d:%02d", minutes, seconds);
+    width = MeasureText(text, 24);
+    DrawText(text, GetScreenWidth() - width - 20, 20, 24, RAYWHITE);
+}
+
 void renderer::draw(const game_state &state, const Camera3D &cam)
 {
     float phase = std::fmod(GetTime(), 60.0f) / 60.0f;
@@ -269,4 +289,5 @@ void renderer::draw(const game_state &state, const Camera3D &cam)
         _showLevels = !_showLevels;
     if (_showLevels)
         drawPlayerLevels(state, cam);
+    drawElapsedTime(state);
 }
