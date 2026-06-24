@@ -267,7 +267,8 @@ void renderer::drawElapsedTime(const game_state &state)
     DrawText(text, GetScreenWidth() - width - 20, 20, 24, RAYWHITE);
 }
 
-void renderer::draw(const game_state &state, const Camera3D &cam)
+void renderer::draw(const game_state &state, const Camera3D &cam,
+    const ParticleSystem &particles)
 {
     float phase = std::fmod(GetTime(), 60.0f) / 60.0f;
     float light = (std::sin(phase * 2.0f * PI) + 1.0f) / 2.0f;
@@ -284,6 +285,7 @@ void renderer::draw(const game_state &state, const Camera3D &cam)
     drawResources(state);
     drawEggs(state);
     drawPlayers(state);
+    particles.draw(cam);
     EndMode3D();
     if (IsKeyPressed(KEY_L))
         _showLevels = !_showLevels;
