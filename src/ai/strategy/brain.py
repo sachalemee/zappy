@@ -71,6 +71,11 @@ class Brain:
             self._broadcast_attempts = 0 # left the state (joined someone, leveled up...) ; start fresh next time
             self._last_players_here = 1
 
+        if self.fsm.state != State.GATHER:
+            self.state.incoming_call = None
+            self._last_gather_k = None
+            self._following_caller_id = None
+
         tile = self.state.current_tile()
         # eject works like this : pushes everyone else off the tile (and destroys their eggs there); only outside of GATHER/INCANTATE/BROADCAST so we never eject players we actually want to elevate with
         if self.fsm.state in (State.COLLECT, State.SURVIVE) and tile and tile.players_here > 1:
