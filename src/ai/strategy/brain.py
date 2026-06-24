@@ -32,16 +32,19 @@ class Brain:
         # near each other (e.g. via Fork) fan out instead of retracing the same path
         self.navigator = Navigator(start_offset=os.getpid() % 4)
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
-        self.incantation_pending = False
-        self.depositing = False # once the bag has everything needed, stay in deposit mode until the ground does too (avoids take/set flip-flopping on the same stone)
-        self.last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
-        self.broadcast_cooldown = 0
-        self.broadcast_attempts = 0 # consecutive Broadcasts sent with nobody showing up
-        self.just_gave_up = False # reclaimed our stones after giving up ; walk away before trying this spot again
-        self.reported_resources: dict[str, tuple[int, int]] = {} # resource -> position we last broadcast it from, so we don't repeat every tick
-        self.ticks_since_inventory = INVENTORY_POLL_INTERVAL
-        self.ticks_since_look = LOOK_POLL_INTERVAL
-        self.ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
+        self._caller_id = os.getpid() # identifies us as a caller in our own incant calls
+        self._following_caller_id: int | None = None # caller we're currently walking toward, if any
+        self._incantation_pending = False
+        self._depositing = False # once the bag has everything needed, stay in deposit mode until the ground does too (avoids take/set flip-flopping on the same stone)
+        self._last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
+        self._broadcast_cooldown = 0
+        self._broadcast_attempts = 0 # consecutive Broadcasts sent with nobody showing up
+        self._last_players_here = 1 # players_here as of the last BROADCAST tick, to detect a sibling joining
+        self._just_gave_up = False # reclaimed our stones after giving up ; walk away before trying this spot again
+        self._reported_resources: dict[str, tuple[int, int]] = {} # resource -> position we last broadcast it from, so we don't repeat every tick
+        self._ticks_since_inventory = INVENTORY_POLL_INTERVAL
+        self._ticks_since_look = LOOK_POLL_INTERVAL
+        self._ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
 
     def decide(self) -> Action:
         self.next_argument = None
@@ -65,7 +68,8 @@ class Brain:
         self.fsm.transition(self.state)
 
         if self.fsm.state != State.BROADCAST:
-            self.broadcast_attempts = 0 # left the state (joined someone, leveled up...) ; start fresh next time
+            self._broadcast_attempts = 0 # left the state (joined someone, leveled up...) ; start fresh next time
+            self._last_players_here = 1
 
         tile = self.state.current_tile()
         # eject works like this : pushes everyone else off the tile (and destroys their eggs there); only outside of GATHER/INCANTATE/BROADCAST so we never eject players we actually want to elevate with
@@ -81,7 +85,15 @@ class Brain:
         if self.fsm.state == State.FORK:
             return Action.FORK # lays an egg, adds one free slot to the team
         if self.fsm.state == State.BROADCAST:
-            if self.broadcast_attempts >= BROADCAST_GIVEUP_LIMIT:
+            players_here = tile.players_here if tile else 1
+            if players_here > self._last_players_here:
+                # a sibling just joined ; progress is being made, don't abandon the spot
+                self._broadcast_attempts = 0
+            self._last_players_here = players_here
+            # the more players a level needs, the longer it's worth waiting for them to arrive
+            required_players = INCANTATION_REQUIREMENTS.get(self.state.level, {}).get("players", 1)
+            giveup_limit = BROADCAST_GIVEUP_LIMIT * required_players
+            if self._broadcast_attempts >= giveup_limit:
                 # nobody's coming ; give up on this spot and fall through to the gather
                 # logic below, which will pick our own dropped stones back up since
                 # they're sitting right here and our bag is short of them again
@@ -92,16 +104,17 @@ class Brain:
                 return Action.LOOK # stay put and wait for the cooldown ; falling through would
                                    # re-take the stones we just deposited here for the call
             else:
-                self.broadcast_cooldown = BROADCAST_COOLDOWN
-                self.broadcast_attempts += 1
-                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+                self._broadcast_cooldown = BROADCAST_COOLDOWN
+                self._broadcast_attempts += 1
+                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level, self._caller_id)
                 return Action.BROADCAST
         if self.fsm.state == State.GATHER:
             _, k = self.state.incoming_call
             if k == 0:
                 self.state.incoming_call = None
-                self.last_gather_k = None
-            elif k == self.last_gather_k:
+                self._last_gather_k = None
+                self._following_caller_id = None
+            elif k == self._last_gather_k:
                 # no fresh broadcast since we turned for this k ; advance instead of
                 # re-issuing the same turn every tick (that would just spin in place)
                 return Action.FORWARD
@@ -188,9 +201,15 @@ class Brain:
             return False
 
         k, text = parsed
-        level = Coordinator.parse_incant_call(self.state.team_name, text)
-        if level is not None and level == self.state.level:
-            self.state.incoming_call = (level, k)
+        call = Coordinator.parse_incant_call(self.state.team_name, text)
+        if call is not None:
+            level, caller_id = call
+            already_following_someone_else = (
+                self._following_caller_id is not None and self._following_caller_id != caller_id
+            )
+            if level == self.state.level and not already_following_someone_else:
+                self.state.incoming_call = (level, k)
+                self._following_caller_id = caller_id
             return True
 
         report = Coordinator.parse_resource_report(self.state.team_name, text)

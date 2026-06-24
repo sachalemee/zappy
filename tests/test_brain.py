@@ -129,7 +129,7 @@ class TestBroadcastGiveUp(unittest.TestCase):
         self.assertEqual(action, Action.BROADCAST)
         self.assertEqual(
             brain.next_argument,
-            Coordinator.encode_incant_call(brain.state.team_name, brain.state.level),
+            Coordinator.encode_incant_call(brain.state.team_name, brain.state.level, brain._caller_id),
         )
 
     def test_waits_out_the_cooldown_with_look(self):
@@ -141,12 +141,36 @@ class TestBroadcastGiveUp(unittest.TestCase):
     def test_gives_up_after_the_attempt_limit_and_reclaims_its_stones(self):
         from src.ai.strategy.brain import BROADCAST_GIVEUP_LIMIT
         brain = self._setup_broadcasting()
-        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT
+        # level 2 needs 2 players, so the effective limit is scaled by that
+        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT * 2
         action = brain.decide()
         self.assertTrue(brain._just_gave_up)
         # falls through to the gather logic, which picks our own dropped stone back up
         self.assertEqual(action, Action.TAKE)
         self.assertEqual(brain._broadcast_attempts, 0)
+
+    def test_does_not_give_up_early_when_more_players_are_required(self):
+        from src.ai.strategy.brain import BROADCAST_GIVEUP_LIMIT
+        brain = make_brain(level=4)
+        tile = brain.state.current_tile()
+        tile.resources.update({"linemate": 1, "deraumere": 1, "sibur": 2, "phiras": 1})
+        tile.players_here = 1 # alone : level 4 needs 4
+        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT # would have given up for level 2
+        self.assertEqual(brain.decide(), Action.BROADCAST)
+        self.assertFalse(brain._just_gave_up)
+
+    def test_resets_attempts_when_a_sibling_joins(self):
+        from src.ai.strategy.brain import BROADCAST_GIVEUP_LIMIT
+        brain = make_brain(level=4)
+        tile = brain.state.current_tile()
+        tile.resources.update({"linemate": 1, "deraumere": 1, "sibur": 2, "phiras": 1})
+        tile.players_here = 1
+        brain._broadcast_attempts = BROADCAST_GIVEUP_LIMIT * 4 - 1 # one tick away from giving up
+        brain.decide() # records players_here=1 as the baseline
+        tile.players_here = 2 # a sibling just arrived
+        brain.decide()
+        self.assertEqual(brain._broadcast_attempts, 0)
+        self.assertFalse(brain._just_gave_up)
 
 
 class TestGather(unittest.TestCase):
@@ -267,9 +291,10 @@ class TestUpdateLookAndInventory(unittest.TestCase):
 class TestHandlePushedLines(unittest.TestCase):
     def test_handle_broadcast_sets_incoming_call_for_matching_level(self):
         brain = make_brain(level=2)
-        line = f"message 5, {Coordinator.encode_incant_call('team1', 2)}"
+        line = f"message 5, {Coordinator.encode_incant_call('team1', 2, 999)}"
         self.assertTrue(brain.handle_broadcast(line))
         self.assertEqual(brain.state.incoming_call, (2, 5))
+        self.assertEqual(brain._following_caller_id, 999)
 
     def test_handle_broadcast_consumes_but_ignores_unrelated_messages(self):
         # any "message ..." line is recognized as a broadcast (so main.py won't
@@ -287,6 +312,32 @@ class TestHandlePushedLines(unittest.TestCase):
         line = f"message 6, {Coordinator.encode_resource_report('team1', 'sibur', 2, 9)}"
         self.assertTrue(brain.handle_broadcast(line))
         self.assertEqual(brain.state.known_resources["sibur"], (2, 9))
+
+
+class TestIncantCallLockOn(unittest.TestCase):
+    def test_ignores_a_different_caller_once_following_one(self):
+        brain = make_brain(level=2)
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.handle_broadcast(f"message 7, {Coordinator.encode_incant_call('team1', 2, 222)}")
+        # still pointing at the first caller, not the second
+        self.assertEqual(brain.state.incoming_call, (2, 5))
+        self.assertEqual(brain._following_caller_id, 111)
+
+    def test_keeps_updating_for_the_same_caller(self):
+        brain = make_brain(level=2)
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.handle_broadcast(f"message 3, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        self.assertEqual(brain.state.incoming_call, (2, 3))
+
+    def test_can_follow_a_new_caller_after_arriving(self):
+        brain = make_brain(level=2)
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.decide() # k=5 -> turns, but does not clear the lock
+        brain.state.incoming_call = (2, 0) # simulate arrival at caller 111's tile
+        brain.decide() # k=0 -> clears incoming_call and releases the lock
+        self.assertIsNone(brain._following_caller_id)
+        self.assertTrue(brain.handle_broadcast(f"message 8, {Coordinator.encode_incant_call('team1', 2, 222)}"))
+        self.assertEqual(brain._following_caller_id, 222)
 
     def test_handle_eject_moves_the_player(self):
         brain = make_brain()
