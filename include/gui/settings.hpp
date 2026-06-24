@@ -34,6 +34,10 @@ private:
     void drawWindowMode();
     void drawMiscKeys();
     void drawFrequency(const game_state &state, connection_manager &connection);
+    void drawFrequencyButtons(Rectangle minus, Rectangle plus,
+            int freq, float x, float y);
+    void handleFrequencyClick(Rectangle minus, Rectangle plus, int freq,
+            connection_manager &connection);
     void handleOutsideClick();
     void drawKeyRow(float x, float y, const char *key, const char *label);
     void drawBody();
