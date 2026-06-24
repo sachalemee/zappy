@@ -313,6 +313,32 @@ class TestHandlePushedLines(unittest.TestCase):
         self.assertTrue(brain.handle_broadcast(line))
         self.assertEqual(brain.state.known_resources["sibur"], (2, 9))
 
+
+class TestIncantCallLockOn(unittest.TestCase):
+    def test_ignores_a_different_caller_once_following_one(self):
+        brain = make_brain(level=2)
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.handle_broadcast(f"message 7, {Coordinator.encode_incant_call('team1', 2, 222)}")
+        # still pointing at the first caller, not the second
+        self.assertEqual(brain.state.incoming_call, (2, 5))
+        self.assertEqual(brain._following_caller_id, 111)
+
+    def test_keeps_updating_for_the_same_caller(self):
+        brain = make_brain(level=2)
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.handle_broadcast(f"message 3, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        self.assertEqual(brain.state.incoming_call, (2, 3))
+
+    def test_can_follow_a_new_caller_after_arriving(self):
+        brain = make_brain(level=2)
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.decide() # k=5 -> turns, but does not clear the lock
+        brain.state.incoming_call = (2, 0) # simulate arrival at caller 111's tile
+        brain.decide() # k=0 -> clears incoming_call and releases the lock
+        self.assertIsNone(brain._following_caller_id)
+        self.assertTrue(brain.handle_broadcast(f"message 8, {Coordinator.encode_incant_call('team1', 2, 222)}"))
+        self.assertEqual(brain._following_caller_id, 222)
+
     def test_handle_eject_moves_the_player(self):
         brain = make_brain()
         self.assertTrue(brain.handle_eject("eject: 5")) # k=5 -> pusher faced the same way -> pushed forward
