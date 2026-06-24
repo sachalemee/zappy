@@ -67,8 +67,12 @@ static team_t *build_teams(char **names)
     for (int i = 0; i < count; i++) {
         teams[i].name = strdup(names[i]);
         teams[i].free_slots = 0;
-        if (!teams[i].name)
+        if (!teams[i].name) {
+            for (int j = 0; j < i; j++)
+                free(teams[j].name);
+            free(teams);
             return NULL;
+        }
     }
     teams[count].name = NULL;
     return teams;
@@ -82,10 +86,8 @@ static int handle_teams(char **av, int *i, server_t *s)
     names = parse_teams(av, i);
     if (!names)
         return IS_EXIT_FAILURE;
-    
     if (s->clients_nb <= 0)
         s->clients_nb = 1;
-        
     s->teams = build_teams(names);
     if (!s->teams) {
         free(names);
@@ -100,13 +102,19 @@ static int handle_teams(char **av, int *i, server_t *s)
 static int parse_single_arg(char **av, int *i, server_t *s)
 {
     int *target;
+    int value;
 
     if (strcmp(av[*i], "-n") == 0)
         return handle_teams(av, i, s);
     for (int j = 0; INT_ARGS[j].flag; j++) {
         if (strcmp(av[*i], INT_ARGS[j].flag) == 0) {
+            value = get_int(av, i);
+            if (value < 0) {
+                write(2, "[ERROR] Invalid argument value\n", 32);
+                return IS_EXIT_FAILURE;
+            }
             target = (int *)((char *)s + INT_ARGS[j].offset);
-            *target = get_int(av, i);
+            *target = value;
             return IS_EXIT_SUCCESS;
         }
     }
