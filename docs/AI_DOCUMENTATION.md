@@ -275,6 +275,60 @@ Important : la direction `K` que renvoie le serveur est relative à celui qui *�
 
 <br>
 
+### Exemple concret : deux IA qui se parlent
+
+Prenons deux IA de la même équipe `team1`, niveau 2, sur deux coins opposés de la carte. L'IA A vient de poser ses pierres et est prêt à lancer son incantation, mais il lui manque un deuxième joueur niveau 2 sur sa tuile (le sujet l'exige). Il bascule en `BROADCAST` :
+
+<br>
+
+```python
+self.next_argument = Coordinator.encode_incant_call("team1", 2)
+return Action.BROADCAST
+```
+
+Ce qui part littéralement sur le socket, au format imposé par le sujet (`Broadcast <text>\n`) :
+
+```
+Broadcast ZAPPY;team1;INCANT;2
+```
+
+<br>
+
+Le serveur calcule `K` *pour chaque auditeur séparément* (sa direction dépend de la position et de l'orientation de qui écoute), donc L'IA B ne reçoit pas le même texte, il reçoit sa propre ligne, par exemple :
+
+```
+message 3, ZAPPY;team1;INCANT;2
+```
+
+<br>
+
+Côté IA B, `handle_broadcast` décode le texte, vérifie que c'est bien un appel d'incantation pour *son* équipe et *son* niveau, et range `K` pour que `decide()` s'en serve la prochaine fois :
+
+```python
+k, text = Coordinator.parse_broadcast_line(line)        # k=3, text="ZAPPY;team1;INCANT;2"
+level = Coordinator.parse_incant_call("team1", text)     # level=2
+if level == self.state.level:
+    self.state.incoming_call = (level, k)                 # la FSM passera en GATHER au prochain tick
+```
+
+<br>
+
+L'IA B tourne alors vers `K=3` (`Navigator.move_toward_sound`), avance tick après tick, et reçoit un nouveau `message K, ...` à chaque fois que A rebroadcast (`BROADCAST_COOLDOWN`) avec un `K` mis à jour puisque B se rapproche. Quand B arrive enfin sur la tuile de A, le serveur lui envoie `K=0`, et `decide()` quitte `GATHER` pour aller lancer l'incantation aux côtés de A.
+
+<br>
+
+Même mécanique pour un rapport de ressource, sauf que le texte transporte une position absolue au lieu d'un niveau :
+
+```
+Broadcast ZAPPY;team1;RESOURCE;thystame;14;3
+```
+
+<br>
+
+N'importe quel coéquipier qui a encore besoin de `thystame` et qui entend ce message ira directement en `(14, 3)` (`Navigator.move_toward_position`) au lieu de tomber sur cette pierre par hasard en explorant. Une IA qui n'en a pas besoin l'ignore (`_next_known_target` ne renvoie que des ressources qui manquent encore).
+
+<br>
+
 ## 8. Se reproduire : `Fork` et le suivi des slots libres, une histoire sous fond de doro party
 
 `Fork` pose un oeuf et libère un slot dans l'équipe (`team->free_slots++` côté serveur). On ne déclenche un `Fork` que quand on a un net surplus (`has_fork_surplus`, `src/ai/algo/fsm.py`) :
