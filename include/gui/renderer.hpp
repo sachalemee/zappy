@@ -9,7 +9,7 @@
 #define RENDERER_HPP_
 
 #include "game/gamestate.hpp"
-#include "audio/effects/particle_system.hpp"
+#include "effects/particle_system.hpp"
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
