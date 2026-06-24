@@ -15,7 +15,7 @@ static constexpr float PARTICLE_SIZE = 0.3f;
 
 static float randomFloat(float min, float max)
 {
-    return min + (max - min) * (static_cast<float>(rand()) / RAND_MAX);
+    return min + (max - min) * (static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
 }
 
 ParticleSystem::ParticleSystem()
