@@ -129,7 +129,7 @@ class TestBroadcastGiveUp(unittest.TestCase):
         self.assertEqual(action, Action.BROADCAST)
         self.assertEqual(
             brain.next_argument,
-            Coordinator.encode_incant_call(brain.state.team_name, brain.state.level),
+            Coordinator.encode_incant_call(brain.state.team_name, brain.state.level, brain._caller_id),
         )
 
     def test_waits_out_the_cooldown_with_look(self):
@@ -291,9 +291,10 @@ class TestUpdateLookAndInventory(unittest.TestCase):
 class TestHandlePushedLines(unittest.TestCase):
     def test_handle_broadcast_sets_incoming_call_for_matching_level(self):
         brain = make_brain(level=2)
-        line = f"message 5, {Coordinator.encode_incant_call('team1', 2)}"
+        line = f"message 5, {Coordinator.encode_incant_call('team1', 2, 999)}"
         self.assertTrue(brain.handle_broadcast(line))
         self.assertEqual(brain.state.incoming_call, (2, 5))
+        self.assertEqual(brain._following_caller_id, 999)
 
     def test_handle_broadcast_consumes_but_ignores_unrelated_messages(self):
         # any "message ..." line is recognized as a broadcast (so main.py won't
