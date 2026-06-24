@@ -290,7 +290,7 @@ class TestHandlePushedLines(unittest.TestCase):
 
     def test_handle_eject_moves_the_player(self):
         brain = make_brain()
-        self.assertTrue(brain.handle_eject("eject: 1"))
+        self.assertTrue(brain.handle_eject("eject: 5")) # k=5 -> pusher faced the same way -> pushed forward
         self.assertEqual(brain.state.position, (0, 9)) # pushed forward (north)
 
     def test_handle_level_up_sets_the_new_level(self):

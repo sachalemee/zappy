@@ -74,28 +74,29 @@ class TestApplyMove(unittest.TestCase):
 
 
 class TestApplyEject(unittest.TestCase):
-    def test_k_one_pushes_forward(self):
+    def test_k_five_pushes_forward(self):
+        # k=5 -> pusher faced the same way we do -> pushed straight ahead
         state = GameState(10, 10)
         state.position = (5, 5)
         state.direction = NORTH
-        state.apply_eject(1)
+        state.apply_eject(5)
         self.assertEqual(state.position, (5, 4))
 
-    def test_k_three_pushes_left_of_facing_direction(self):
+    def test_k_three_pushes_right_of_facing_direction(self):
         state = GameState(10, 10)
         state.position = (5, 5)
         state.direction = NORTH
         state.apply_eject(3) # relative=1 -> facing+1 -> EAST
         self.assertEqual(state.position, (6, 5))
 
-    def test_k_five_pushes_behind(self):
+    def test_k_one_pushes_behind(self):
         state = GameState(10, 10)
         state.position = (5, 5)
         state.direction = NORTH
-        state.apply_eject(5) # relative=2 -> opposite of facing -> SOUTH
+        state.apply_eject(1) # relative=2 -> opposite of facing -> SOUTH
         self.assertEqual(state.position, (5, 6))
 
-    def test_k_seven_pushes_right_of_facing_direction(self):
+    def test_k_seven_pushes_left_of_facing_direction(self):
         state = GameState(10, 10)
         state.position = (5, 5)
         state.direction = NORTH

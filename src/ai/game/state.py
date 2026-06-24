@@ -59,12 +59,12 @@ class GameState:
         self.move_in_direction(self.direction)
 
     def apply_eject(self, k: int) -> None:
-        # eject works like this : "eject: K" gives the relative tile (1-8) the push came from, same octant convention as broadcast sound
-        if k in (8, 1, 2):
+        # eject works like this : k=5 means we got pushed forward, then clockwise from there (k=3 right, k=1 behind, k=7 left)
+        if k == 5:
             relative = 0
-        elif k in (3, 4):
+        elif k == 3:
             relative = 1
-        elif k == 5:
+        elif k == 1:
             relative = 2
         else:
             relative = 3

@@ -44,6 +44,13 @@ class TestHandshake(unittest.TestCase):
         with self.assertRaises(ConnectionError):
             protocol.handshake("team1")
 
+    def test_raises_when_team_is_rejected_with_ko(self):
+        # server now writes "ko\n" before closing the socket on a full/unknown team
+        protocol = make_protocol()
+        protocol.connection.receive_line.side_effect = ["WELCOME", "ko"]
+        with self.assertRaises(ConnectionError):
+            protocol.handshake("team1")
+
 
 class TestSendCommand(unittest.TestCase):
     def test_sends_the_command_and_queues_the_action(self):
