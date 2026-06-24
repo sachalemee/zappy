@@ -79,6 +79,8 @@ GUI_SRC         = $(addprefix src/gui/, \
                     renderer.cpp \
                     game/gamestate.cpp \
                     audio/audio_manager.cpp \
+                    audio/effects/particle.cpp \
+                    audio/effects/particle_system.cpp \
                 )
 
 GUI_NAME		= zappy_gui
@@ -155,6 +157,12 @@ obj/gui/gamestate.o:	src/gui/game/gamestate.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 obj/gui/audio_manager.o:	src/gui/audio/audio_manager.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/particle.o:	src/gui/effects/particle.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
+
+obj/gui/particle_system.o:	src/gui/effects/particle_system.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(GUI_CPPFLAGS) -c $< -o $@
 
 obj/gui/TeamList.o:    src/gui/TeamList/TeamList.cpp

@@ -9,6 +9,7 @@
 #define RENDERER_HPP_
 
 #include "game/gamestate.hpp"
+#include "effects/particle_system.hpp"
 #include <cmath>
 #include <raylib.h>
 #include <raymath.h>
@@ -17,7 +18,8 @@ class renderer {
 public:
     renderer();
     ~renderer();
-    void draw(const game_state &state, const Camera3D &cam);
+    void draw(const game_state &state, const Camera3D &cam,
+        const ParticleSystem &particles);
 private:
     void drawTiles(const game_state &state) const;
     void drawTile(int x, int y) const;
