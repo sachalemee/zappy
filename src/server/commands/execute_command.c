@@ -40,7 +40,7 @@ static void start_command(client_t *c)
 {
     const cmd_map_t *cmd;
 
-    if (c->nb_cmds == 0 || c->action_end_time > 0)
+    if (!c || c->nb_cmds == 0 || c->action_end_time > 0 || c->cmds[0][0] == '\0')
         return;
     cmd = get_cmd(c->cmds[0]);
     if (!cmd) {
@@ -55,17 +55,18 @@ static void start_command(client_t *c)
             return;
         }
     }
-    c->action_end_time = get_current_time() + 
-        get_action_duration(c->server->freq, cmd->time_cost);
+    c->action_end_time = get_current_time() + get_action_duration(c->server->freq, cmd->time_cost);
 }
 
 static void finish_command(client_t *c)
 {
     const cmd_map_t *cmd;
-    long long current = get_current_time();
+    long long current;
 
-    if (c->nb_cmds == 0 || c->action_end_time == 0 || 
-        current < c->action_end_time)
+    if (!c || c->nb_cmds == 0 || c->action_end_time == 0 || c->cmds[0][0] == '\0')
+       return;
+    current = get_current_time();
+    if (current < c->action_end_time)
         return;
     cmd = get_cmd(c->cmds[0]);
     if (cmd && cmd->func)
@@ -90,6 +91,7 @@ void handle_active_commands(server_t *s)
             if (strncmp(cmd, "mct", 3) == 0 ||
                 strncmp(cmd, "bct", 3) == 0 ||
                 strncmp(cmd, "sgt", 3) == 0 ||
+                strncmp(cmd, "sst", 3) == 0 ||
                 strncmp(cmd, "tna", 3) == 0) {
                 handle_gui_command(s, c);
             } else if (strncmp(cmd, "pin", 3) == 0 ||

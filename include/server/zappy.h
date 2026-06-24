@@ -8,6 +8,8 @@
 #ifndef ZAPPY_H_
     #define ZAPPY_H_
 
+#include <unistd.h>
+
 #define IS_EXIT_FAILURE 84
 #define IS_EXIT_SUCCESS 0
 #define MAX_CMDS 10
@@ -168,10 +170,6 @@ void gui_send_initial_data(server_t *s, int fd);
 
 void handle_gui_command(server_t *s, client_t *c);
 void handle_gui_player_command(server_t *s, client_t *c);
-
-//TEAM
-
-team_t *find_team(server_t *s, const char *name);
 
 //PLAYER
 

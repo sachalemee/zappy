@@ -50,22 +50,31 @@ jobs:
           sudo cmake --build /tmp/raylib/build --target install
           sudo ldconfig
 
+      - name: Configure project
+        run: cmake -S . -B build
+
       - name: Build project
-        run: make
+        run: cmake --build build -j
         timeout-minutes: 2
 
       - name: Build zappy server
-        run: make zappy_server
+        run: cmake --build build --target zappy_server
 
       - name: Build zappy gui
-        run: make zappy_gui
+        run: cmake --build build --target zappy_gui
+
+      - name: Build zappy ai
+        run: cmake --build build --target zappy_ai
 
       - name: Clean project
-        run: make clean
+        run: cmake --build build --target clean
         timeout-minutes: 2
 
       - name: Rebuild project
-        run: make re
+        run: |
+          rm -rf build zappy_server zappy_gui zappy_ai
+          cmake -S . -B build
+          cmake --build build -j
         timeout-minutes: 2
 
       - name: Check executables
@@ -82,4 +91,4 @@ jobs:
           done
 
       - name: Complete project clean
-        run: make fclean
+        run: rm -rf build zappy_server zappy_gui zappy_ai

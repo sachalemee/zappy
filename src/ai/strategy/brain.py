@@ -49,20 +49,20 @@ class Brain:
     def decide(self) -> Action:
         self.next_argument = None
 
-        self._ticks_since_look += 1
-        self._ticks_since_inventory += 1
-        self._ticks_since_connect_nbr += 1
+        self.ticks_since_look += 1
+        self.ticks_since_inventory += 1
+        self.ticks_since_connect_nbr += 1
 
-        if self._ticks_since_look >= LOOK_POLL_INTERVAL:
-            self._ticks_since_look = 0
+        if self.ticks_since_look >= LOOK_POLL_INTERVAL:
+            self.ticks_since_look = 0
             return Action.LOOK
 
-        if self._ticks_since_inventory >= INVENTORY_POLL_INTERVAL:
-            self._ticks_since_inventory = 0
+        if self.ticks_since_inventory >= INVENTORY_POLL_INTERVAL:
+            self.ticks_since_inventory = 0
             return Action.INVENTORY
 
-        if self._ticks_since_connect_nbr >= CONNECT_NBR_POLL_INTERVAL:
-            self._ticks_since_connect_nbr = 0
+        if self.ticks_since_connect_nbr >= CONNECT_NBR_POLL_INTERVAL:
+            self.ticks_since_connect_nbr = 0
             return Action.CONNECT_NBR
 
         self.fsm.transition(self.state)
@@ -78,9 +78,9 @@ class Brain:
 
         if self.fsm.state == State.INCANTATE:
             # incantation works like this : frozen 300/f ticks, two replies ("Elevation underway" then "Current level: N"/"ko"); don't resend
-            if self._incantation_pending:
+            if self.incantation_pending:
                 return Action.LOOK
-            self._incantation_pending = True
+            self.incantation_pending = True
             return Action.INCANTATION
         if self.fsm.state == State.FORK:
             return Action.FORK # lays an egg, adds one free slot to the team
@@ -97,10 +97,10 @@ class Brain:
                 # nobody's coming ; give up on this spot and fall through to the gather
                 # logic below, which will pick our own dropped stones back up since
                 # they're sitting right here and our bag is short of them again
-                self._broadcast_attempts = 0
-                self._just_gave_up = True
-            elif self._broadcast_cooldown > 0:
-                self._broadcast_cooldown -= 1
+                self.broadcast_attempts = 0
+                self.just_gave_up = True
+            elif self.broadcast_cooldown > 0:
+                self.broadcast_cooldown -= 1
                 return Action.LOOK # stay put and wait for the cooldown ; falling through would
                                    # re-take the stones we just deposited here for the call
             else:
@@ -119,7 +119,7 @@ class Brain:
                 # re-issuing the same turn every tick (that would just spin in place)
                 return Action.FORWARD
             else:
-                self._last_gather_k = k
+                self.last_gather_k = k
                 return Navigator.move_toward_sound(k)
 
         if self.fsm.state == State.SURVIVE:
@@ -132,16 +132,16 @@ class Brain:
             bag_missing = missing_resources(self.state.level, self.state.inventory.items)
             bag_complete = not any(amount > 0 for amount in bag_missing.values())
 
-            if bag_complete and self._just_gave_up:
+            if bag_complete and self.just_gave_up:
                 # just reclaimed everything we'd dropped here ; move on before retrying,
                 # or we'd immediately deposit the same stones on this same spot again
-                self._just_gave_up = False
+                self.just_gave_up = False
                 return self.navigator.move_toward_ressource(self.state)
 
-            if not self._depositing and bag_complete:
-                self._depositing = True # bag is fully stocked for this level, commit to dropping it here
+            if not self.depositing and bag_complete:
+                self.depositing = True # bag is fully stocked for this level, commit to dropping it here
 
-            if self._depositing:
+            if self.depositing:
                 # incantation needs stones on the ground, not in the bag ; deposit everything
                 # we're carrying before ever taking anything again, so we don't undo our own drop
                 tile_missing = missing_resources(self.state.level, tile.resources)
@@ -149,7 +149,7 @@ class Brain:
                     if amount > 0 and self.state.inventory.quantity_of(resource) > 0:
                         self.next_argument = resource
                         return Action.SET
-                self._depositing = False # nothing left to drop here, free to gather again
+                self.depositing = False # nothing left to drop here, free to gather again
             else:
                 # gather up to what incantation needs (at least 1 of each, even past the
                 # requirement, so a fork-worthy stockpile can build up too) ; safe from
@@ -166,7 +166,7 @@ class Brain:
                         self.next_argument = resource
                         return Action.TAKE
 
-        known_target = self._next_known_target()
+        known_target = self.next_known_target()
         if known_target is not None:
             resource, position = known_target
             if position == self.state.position:
@@ -178,9 +178,9 @@ class Brain:
             for resource, quantity in tile.resources.items():
                 if resource == "food" or quantity <= 0:
                     continue
-                if self._reported_resources.get(resource) == self.state.position:
+                if self.reported_resources.get(resource) == self.state.position:
                     continue
-                self._reported_resources[resource] = self.state.position
+                self.reported_resources[resource] = self.state.position
                 self.next_argument = Coordinator.encode_resource_report(
                     self.state.team_name, resource, *self.state.position)
                 return Action.BROADCAST
@@ -250,7 +250,7 @@ class Brain:
             self.state.update_inventory(Inventory.from_response(response))
         elif action == Action.FORWARD and response == "ok":
             self.state.apply_move()
-            self._ticks_since_look = LOOK_POLL_INTERVAL # tile changed, look again next tick
+            self.ticks_since_look = LOOK_POLL_INTERVAL # tile changed, look again next tick
         elif action in (Action.LEFT, Action.RIGHT) and response == "ok":
             self.state.apply_turn(action)
         elif action == Action.TAKE and response == "ok" and self.next_argument:
@@ -258,20 +258,20 @@ class Brain:
         elif action == Action.SET and response == "ok" and self.next_argument:
             self.move_resource(self.next_argument, from_tile=False)
         elif action == Action.INCANTATION:
-            self._incantation_pending = False
+            self.incantation_pending = False
             if "Current level" in response:
                 self.state.level = int(response.rsplit(":", 1)[-1].strip())
         elif action == Action.FORK and response == "ok":
             # fork works like this : lays an egg and frees a team slot ; the real count (which also moves from other processes' forks or
             # eggs already on the board at startup) only comes from the server, so re-poll Connect_nbr next tick instead of guessing
-            self._ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
+            self.ticks_since_connect_nbr = CONNECT_NBR_POLL_INTERVAL
         elif action == Action.CONNECT_NBR:
             try:
                 self.state.known_free_slots = int(response)
             except ValueError:
                 pass
         elif action == Action.EJECT and response == "ok":
-            self._ticks_since_look = LOOK_POLL_INTERVAL # tile just got cleared, refresh vision
+            self.ticks_since_look = LOOK_POLL_INTERVAL # tile just got cleared, refresh vision
 
     def move_resource(self, resource: str, from_tile: bool) -> None:
         tile = self.state.current_tile()

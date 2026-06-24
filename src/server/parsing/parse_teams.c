@@ -27,13 +27,18 @@ static int count_teams(char **av, int i)
 char **parse_teams(char **av, int *i)
 {
     int count = count_teams(av, *i);
-    char **teams = malloc(sizeof(char *) * (count + 1));
+    char **teams;
 
-    if (!teams || count <= 0)
+    if (count <= 0)
+        return NULL;
+    teams = malloc(sizeof(char *) * (count + 1));
+    if (!teams)
         return NULL;
     for (int j = 0; j < count; j++) {
-        if (!av[*i] || is_flag(av[*i]))
+        if (!av[*i] || av[*i][0] == '-') {
+            free(teams);
             return NULL;
+        }
         teams[j] = av[*i];
         (*i)++;
     }

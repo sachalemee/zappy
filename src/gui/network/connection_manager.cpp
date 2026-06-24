@@ -45,8 +45,17 @@ bool connection_manager::incantationFailed(std::istringstream &args) const
     return result == 0;
 }
 
-void connection_manager::playEventSound(const std::string &line,
-    AudioManager &audio)
+Vector3 connection_manager::eventPosition(std::istringstream &args) const
+{
+    int x = 0;
+    int y = 0;
+
+    args >> x >> y;
+    return {static_cast<float>(x), 0.5f, static_cast<float>(y)};
+}
+
+bool connection_manager::playEventSound(const std::string &cmd,
+    std::istringstream &args, AudioManager &audio) const
 {
     static const std::unordered_map<std::string, SoundId> SIMPLE_SOUNDS = {
         {"pnw", SoundId::Spawn},
@@ -58,29 +67,60 @@ void connection_manager::playEventSound(const std::string &line,
         {"ebo", SoundId::EggCrack},
         {"edi", SoundId::Death},
     };
+    static const std::unordered_map<std::string, SoundId> RESOURCE_SOUNDS = {
+        {"pdr", SoundId::Drop},
+        {"pgt", SoundId::PickUp},
+    };
+    auto sound = SIMPLE_SOUNDS.find(cmd);
+    auto resource = RESOURCE_SOUNDS.find(cmd);
 
+    if (sound != SIMPLE_SOUNDS.end()) {
+        audio.play(sound->second);
+        return false;
+    }
+    if (cmd == "pie") {
+        bool failed = incantationFailed(args);
+
+        if (failed)
+            audio.play(SoundId::IncantationFail);
+        return failed;
+    }
+    if (resource != RESOURCE_SOUNDS.end())
+        audio.play(resourceSound(args, resource->second));
+    return false;
+}
+
+void connection_manager::spawnIncantationParticles(const std::string &cmd,
+    std::istringstream &args, ParticleSystem &particles, bool failed) const
+{
+    static const Color START_COLOR = {170, 90, 220, 255};
+    static const Color SUCCESS_COLOR = {255, 215, 0, 255};
+
+    if (cmd == "pic")
+        particles.spawn(eventPosition(args), START_COLOR, 16);
+    else if (cmd == "pie" && !failed)
+        particles.spawn(eventPosition(args), SUCCESS_COLOR, 16);
+}
+
+void connection_manager::playEventEffects(const std::string &line,
+    AudioManager &audio, ParticleSystem &particles) const
+{
     if (line.size() < 3)
         return;
     std::string cmd = line.substr(0, 3);
-    std::istringstream args(line.substr(3));
-    auto it = SIMPLE_SOUNDS.find(cmd);
+    std::istringstream soundArgs(line.substr(3));
+    std::istringstream particleArgs(line.substr(3));
+    bool failed = playEventSound(cmd, soundArgs, audio);
 
-    if (it != SIMPLE_SOUNDS.end())
-        audio.play(it->second);
-    else if (cmd == "pie" && incantationFailed(args))
-        audio.play(SoundId::IncantationFail);
-    else if (cmd == "pdr")
-        audio.play(resourceSound(args, SoundId::Drop));
-    else if (cmd == "pgt")
-        audio.play(resourceSound(args, SoundId::PickUp));
+    spawnIncantationParticles(cmd, particleArgs, particles, failed);
 }
 
 void connection_manager::handleLine(const std::string &line,
-    game_state &state, AudioManager &audio)
+    game_state &state, AudioManager &audio, ParticleSystem &particles)
 {
     if (_isConnected) {
         std::cout << "[SERVER] " << line << std::endl;
-        playEventSound(line, audio);
+        playEventEffects(line, audio, particles);
         state.handleLine(line);
     } else if (line == "WELCOME") {
         _net.sendLine("GRAPHIC\n");
@@ -88,7 +128,8 @@ void connection_manager::handleLine(const std::string &line,
     }
 }
 
-void connection_manager::update(game_state &state, AudioManager &audio)
+void connection_manager::update(game_state &state, AudioManager &audio,
+    ParticleSystem &particles)
 {
     if (_isConnected && !_net.isConnected()) {
         state.reset();
@@ -98,5 +139,5 @@ void connection_manager::update(game_state &state, AudioManager &audio)
 
     std::vector<std::string> lines = _net.poll();
     for (std::size_t i = 0; i < lines.size(); i++)
-        handleLine(lines[i], state, audio);
+        handleLine(lines[i], state, audio, particles);
 }

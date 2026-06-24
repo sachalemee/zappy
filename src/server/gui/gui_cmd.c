@@ -7,23 +7,31 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include "zappy.h"
 
 static void handle_time_cmd(server_t *s, client_t *c, char *cmd)
 {
     char buf[64];
-    int new_freq = -1;
+    int new_freq = atoi(cmd + 4);
 
+    if (strncmp(cmd, "sgt", 3) == 0) {
+        snprintf(buf, sizeof(buf), "sgt %d\n", s->freq);
+        write(c->fd, buf, strlen(buf));
+        return;
+    }
     if (strncmp(cmd, "sst", 3) == 0) {
-        if (sscanf(cmd, "sst %d", &new_freq) != 1 || new_freq <= 0) {
+        if (new_freq <= 0) {
             write(c->fd, "sbp\n", 4);
             return;
         }
         s->freq = new_freq;
+        snprintf(buf, sizeof(buf), "sst %d\n", s->freq);
+        write(c->fd, buf, strlen(buf));
+        return;
     }
-    snprintf(buf, sizeof(buf), "sgt %d\n", s->freq);
-    write(c->fd, buf, strlen(buf));
+    write(c->fd, "suc\n", 4);
 }
 
 static int handle_map_cmd(server_t *s, client_t *c, char *cmd)
