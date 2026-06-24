@@ -12,7 +12,7 @@ Rectangle SettingsButton::buttonRect() const
     int sw = GetScreenWidth();
     float size = 50;
     float x = sw - size - 20;
-    float y = 20 + 2 * (size + 10);
+    float y = 70 + 2 * (size + 10);
 
     return {x, y, size, size};
 }
