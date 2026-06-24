@@ -201,9 +201,15 @@ class Brain:
             return False
 
         k, text = parsed
-        level = Coordinator.parse_incant_call(self.state.team_name, text)
-        if level is not None and level == self.state.level:
-            self.state.incoming_call = (level, k)
+        call = Coordinator.parse_incant_call(self.state.team_name, text)
+        if call is not None:
+            level, caller_id = call
+            already_following_someone_else = (
+                self._following_caller_id is not None and self._following_caller_id != caller_id
+            )
+            if level == self.state.level and not already_following_someone_else:
+                self.state.incoming_call = (level, k)
+                self._following_caller_id = caller_id
             return True
 
         report = Coordinator.parse_resource_report(self.state.team_name, text)
