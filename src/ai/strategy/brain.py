@@ -32,6 +32,8 @@ class Brain:
         # near each other (e.g. via Fork) fan out instead of retracing the same path
         self.navigator = Navigator(start_offset=os.getpid() % 4)
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
+        self._caller_id = os.getpid() # identifies us as a caller in our own incant calls
+        self._following_caller_id: int | None = None # caller we're currently walking toward, if any
         self._incantation_pending = False
         self._depositing = False # once the bag has everything needed, stay in deposit mode until the ground does too (avoids take/set flip-flopping on the same stone)
         self._last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
@@ -104,13 +106,14 @@ class Brain:
             else:
                 self._broadcast_cooldown = BROADCAST_COOLDOWN
                 self._broadcast_attempts += 1
-                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level)
+                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level, self._caller_id)
                 return Action.BROADCAST
         if self.fsm.state == State.GATHER:
             _, k = self.state.incoming_call
             if k == 0:
                 self.state.incoming_call = None
                 self._last_gather_k = None
+                self._following_caller_id = None
             elif k == self._last_gather_k:
                 # no fresh broadcast since we turned for this k ; advance instead of
                 # re-issuing the same turn every tick (that would just spin in place)
