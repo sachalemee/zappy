@@ -19,7 +19,7 @@
 #include "settings.hpp"
 #include "TeamList.hpp"
 #include "audio/audio_manager.hpp"
-#include "audio/effects/particle_system.hpp"
+#include "effects/particle_system.hpp"
 #include <string>
 
 class application {
