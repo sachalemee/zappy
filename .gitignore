@@ -6,3 +6,5 @@ zappy_gui
 zappy_server
 __pycache__/
 build/
+scripts/logs/
+evidence/evidence_1.webm

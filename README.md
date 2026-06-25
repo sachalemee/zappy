@@ -48,7 +48,7 @@ Binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) are produced at the repositor
 
 ```sh
 ./zappy_server -p 4242 -x 10 -y 10 -n team1 team2 -c 3 -f 100
-./zappy_gui -p 4242 -h localhost
+./zappy_gui
 ./zappy_ai -p 4242 -n team1 -h localhost
 ```
 
