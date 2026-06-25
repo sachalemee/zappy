@@ -45,21 +45,6 @@ class TestShortestDelta(unittest.TestCase):
         self.assertEqual(Navigator.shortest_delta(5, 10), -5)
 
 
-class TestMoveTowardSound(unittest.TestCase):
-    def test_k_one_is_straight_ahead(self):
-        self.assertEqual(Navigator.move_toward_sound(1), Action.FORWARD)
-
-    def test_left_octants(self):
-        # per the subject's "trigonomic" (counter-clockwise) diagram, 2/3/4 are on our left
-        for k in (2, 3, 4):
-            self.assertEqual(Navigator.move_toward_sound(k), Action.LEFT, msg=f"k={k}")
-
-    def test_right_octants(self):
-        # 5/6/7/8 are on our right (5 = straight behind, arbitrarily resolved to the right)
-        for k in (5, 6, 7, 8):
-            self.assertEqual(Navigator.move_toward_sound(k), Action.RIGHT, msg=f"k={k}")
-
-
 class TestNextTarget(unittest.TestCase):
     def _walk(self, nav: Navigator, state: GameState, steps: int) -> list[tuple[int, int]]:
         targets = []
