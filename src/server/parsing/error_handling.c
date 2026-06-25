@@ -33,10 +33,6 @@ int error_handling(int ac, char **av, server_t *s)
         write(2, "[ERROR] Invalid clients number\n", 32);
         return IS_EXIT_FAILURE;
     }
-    if (s->freq <= 0) {
-        write(2, "[ERROR] Invalid frequency\n", 27);
-        return IS_EXIT_FAILURE;
-    }
     if (!s->teams || s->nb_teams <= 0) {
         write(2, "[ERROR] No teams defined\n", 26);
         return IS_EXIT_FAILURE;

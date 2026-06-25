@@ -13,6 +13,7 @@ int init_server(server_t *server)
     if (!server)
         return IS_EXIT_FAILURE;
     server->server_fd = -1;
+    server->freq = 100;
     server->nb_players = 0;
     server->map.tiles = NULL;
     server->players = NULL;
