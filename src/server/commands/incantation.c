@@ -57,7 +57,7 @@ int pre_cmd_incantation(server_t *s, client_t *c)
 
     if (!p || p->level >= 8 || check_stones(s, p) == -1)
         return -1;
-    if (count_players(s, p) != P_REQ[p->level - 1])
+    if (count_players(s, p) < P_REQ[p->level - 1])
         return -1;
     gui_event_pic(s, p);
     for (int i = 0; i < s->nb_clients; i++) {
@@ -110,7 +110,7 @@ void cmd_incantation(server_t *s, client_t *c)
 
     if (!p)
         return;
-    if (check_stones(s, p) == -1 || count_players(s, p) != P_REQ[p->level - 1]) {
+    if (check_stones(s, p) == -1 || count_players(s, p) < P_REQ[p->level - 1]) {
         write(c->fd, "ko\n", 3);
         gui_event_pie(s, p, 0);
         return;
