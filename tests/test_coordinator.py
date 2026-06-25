@@ -12,11 +12,11 @@ from src.ai.algo.coordinator import Coordinator
 
 class TestEncodeParseIncantCall(unittest.TestCase):
     def test_round_trip(self):
-        text = Coordinator.encode_incant_call("team1", 3, 1234)
-        self.assertEqual(Coordinator.parse_incant_call("team1", text), (3, 1234))
+        text = Coordinator.encode_incant_call("team1", 3, 1234, 4, 7)
+        self.assertEqual(Coordinator.parse_incant_call("team1", text), (3, 1234, 4, 7))
 
     def test_none_when_wrong_team(self):
-        text = Coordinator.encode_incant_call("team1", 3, 1234)
+        text = Coordinator.encode_incant_call("team1", 3, 1234, 4, 7)
         self.assertIsNone(Coordinator.parse_incant_call("team2", text))
 
     def test_none_when_unrelated_text(self):
@@ -36,7 +36,7 @@ class TestEncodeParseResourceReport(unittest.TestCase):
         self.assertIsNone(Coordinator.parse_resource_report("team1", "hello there"))
 
     def test_none_when_confused_with_incant_call(self):
-        text = Coordinator.encode_incant_call("team1", 3, 1234)
+        text = Coordinator.encode_incant_call("team1", 3, 1234, 4, 7)
         self.assertIsNone(Coordinator.parse_resource_report("team1", text))
 
 

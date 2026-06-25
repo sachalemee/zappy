@@ -65,6 +65,7 @@ class TestEject(unittest.TestCase):
         brain = make_brain(level=2)
         brain.state.current_tile().players_here = 2
         brain.state.incoming_call = (2, 3)
+        brain._caller_position = (5, 5)
         self.assertNotEqual(brain.decide(), Action.EJECT)
 
 
@@ -129,7 +130,8 @@ class TestBroadcastGiveUp(unittest.TestCase):
         self.assertEqual(action, Action.BROADCAST)
         self.assertEqual(
             brain.next_argument,
-            Coordinator.encode_incant_call(brain.state.team_name, brain.state.level, brain._caller_id),
+            Coordinator.encode_incant_call(
+                brain.state.team_name, brain.state.level, brain._caller_id, *brain.state.position),
         )
 
     def test_waits_out_the_cooldown_with_look(self):
@@ -176,22 +178,30 @@ class TestBroadcastGiveUp(unittest.TestCase):
 class TestGather(unittest.TestCase):
     def test_clears_the_call_on_arrival(self):
         brain = make_brain(level=2)
-        brain.state.incoming_call = (2, 0) # k=0 : already on the emitter's tile
+        brain.state.incoming_call = (2, 0)
+        brain._caller_position = brain.state.position # already on the caller's tile
+        brain._following_caller_id = 111
         brain.decide()
         self.assertIsNone(brain.state.incoming_call)
         self.assertIsNone(brain._last_gather_k)
+        self.assertIsNone(brain._following_caller_id)
+        self.assertIsNone(brain._caller_position)
 
-    def test_turns_once_for_a_fresh_k(self):
+    def test_navigates_toward_the_callers_position(self):
         brain = make_brain(level=2)
-        brain.state.incoming_call = (2, 3) # k=3 -> left, per move_toward_sound
-        self.assertEqual(brain.decide(), Action.LEFT)
-        self.assertEqual(brain._last_gather_k, 3)
+        brain.state.incoming_call = (2, 5) # k is no longer used for navigation
+        brain._caller_position = (1, 0) # east of our (0, 0) starting position
+        self.assertEqual(brain.decide(), Action.RIGHT)
 
-    def test_advances_instead_of_re_turning_on_a_stale_k(self):
+    def test_continues_forward_once_aligned(self):
+        from src.ai.game.state import EAST
         brain = make_brain(level=2)
-        brain.state.incoming_call = (2, 3)
-        brain.decide() # turns once, remembers k=3
+        brain.state.direction = EAST
+        brain.state.incoming_call = (2, 5)
+        brain._caller_position = (1, 0)
         self.assertEqual(brain.decide(), Action.FORWARD)
+        self.assertEqual(brain.decide(), Action.FORWARD)
+
 
 
 class TestSurvive(unittest.TestCase):
@@ -291,10 +301,11 @@ class TestUpdateLookAndInventory(unittest.TestCase):
 class TestHandlePushedLines(unittest.TestCase):
     def test_handle_broadcast_sets_incoming_call_for_matching_level(self):
         brain = make_brain(level=2)
-        line = f"message 5, {Coordinator.encode_incant_call('team1', 2, 999)}"
+        line = f"message 5, {Coordinator.encode_incant_call('team1', 2, 999, 4, 7)}"
         self.assertTrue(brain.handle_broadcast(line))
         self.assertEqual(brain.state.incoming_call, (2, 5))
         self.assertEqual(brain._following_caller_id, 999)
+        self.assertEqual(brain._caller_position, (4, 7))
 
     def test_handle_broadcast_consumes_but_ignores_unrelated_messages(self):
         # any "message ..." line is recognized as a broadcast (so main.py won't
@@ -317,27 +328,44 @@ class TestHandlePushedLines(unittest.TestCase):
 class TestIncantCallLockOn(unittest.TestCase):
     def test_ignores_a_different_caller_once_following_one(self):
         brain = make_brain(level=2)
-        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
-        brain.handle_broadcast(f"message 7, {Coordinator.encode_incant_call('team1', 2, 222)}")
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111, 4, 7)}")
+        brain.handle_broadcast(f"message 7, {Coordinator.encode_incant_call('team1', 2, 222, 1, 1)}")
         # still pointing at the first caller, not the second
         self.assertEqual(brain.state.incoming_call, (2, 5))
         self.assertEqual(brain._following_caller_id, 111)
+        self.assertEqual(brain._caller_position, (4, 7))
 
     def test_keeps_updating_for_the_same_caller(self):
         brain = make_brain(level=2)
-        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
-        brain.handle_broadcast(f"message 3, {Coordinator.encode_incant_call('team1', 2, 111)}")
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111, 4, 7)}")
+        brain.handle_broadcast(f"message 3, {Coordinator.encode_incant_call('team1', 2, 111, 4, 8)}")
         self.assertEqual(brain.state.incoming_call, (2, 3))
+        self.assertEqual(brain._caller_position, (4, 8)) # refreshed in case the caller moved
 
     def test_can_follow_a_new_caller_after_arriving(self):
         brain = make_brain(level=2)
-        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111)}")
-        brain.decide() # k=5 -> turns, but does not clear the lock
-        brain.state.incoming_call = (2, 0) # simulate arrival at caller 111's tile
-        brain.decide() # k=0 -> clears incoming_call and releases the lock
+        brain.handle_broadcast(f"message 5, {Coordinator.encode_incant_call('team1', 2, 111, 4, 7)}")
+        brain.decide() # heads toward (4, 7), but does not clear the lock
+        brain.state.position = (4, 7) # simulate arrival at caller 111's tile
+        brain.decide() # arrival -> clears incoming_call and releases the lock
         self.assertIsNone(brain._following_caller_id)
-        self.assertTrue(brain.handle_broadcast(f"message 8, {Coordinator.encode_incant_call('team1', 2, 222)}"))
+        self.assertTrue(brain.handle_broadcast(f"message 8, {Coordinator.encode_incant_call('team1', 2, 222, 1, 1)}"))
         self.assertEqual(brain._following_caller_id, 222)
+
+    def test_releases_lock_when_incantate_preempts_gather(self):
+        # regression: a player already on the rally tile when the call comes in jumps
+        # straight to INCANTATE (it outranks GATHER), which used to skip the k=0 release
+        # entirely and leave the player permanently deaf to every future call
+        brain = make_brain(level=1)
+        tile = brain.state.current_tile()
+        tile.resources["linemate"] = 1
+        tile.players_here = 1
+        brain.state.incoming_call = (1, 3) # stale lock, as if we'd been following someone
+        brain._following_caller_id = 111
+        action = brain.decide()
+        self.assertEqual(action, Action.INCANTATION)
+        self.assertIsNone(brain.state.incoming_call)
+        self.assertIsNone(brain._following_caller_id)
 
     def test_handle_eject_moves_the_player(self):
         brain = make_brain()
