@@ -11,6 +11,8 @@ Settings::Settings()
     : _open(false)
     , _justOpened(false)
     , _draggingSlider(false)
+    , _draggingMusicSlider(false)
+    , _draggingSfxSlider(false)
     , _fullscreen(false)
     , _sensitivity(319.f)
     , _panel{0, 0, 0, 0}
@@ -65,7 +67,7 @@ void Settings::drawOverlay()
 
 void Settings::drawPanel()
 {
-    float pw = 760, ph = 600;
+    float pw = 760, ph = 700;
 
     _panel = {(GetScreenWidth() - pw) / 2.0f,
             (GetScreenHeight() - ph) / 2.0f, pw, ph};
@@ -256,19 +258,63 @@ void Settings::drawBody()
     handleOutsideClick();
 }
 
-void Settings::draw()
+void Settings::draw(AudioManager &audio)
 {
     if (!_open)
         return;
     drawBody();
+    drawSoundSliders(audio);
     _justOpened = false;
 }
 
-void Settings::draw(const game_state &state, connection_manager &connection)
+void Settings::draw(const game_state &state, connection_manager &connection,
+    AudioManager &audio)
 {
     if (!_open)
         return;
     drawBody();
     drawFrequency(state, connection);
+    drawSoundSliders(audio);
     _justOpened = false;
+}
+
+void Settings::drawVolumeSlider(float x, float y, const char *label,
+    float &value, bool &dragging)
+{
+    Vector2 m = GetMousePosition();
+    Rectangle track = {x, y + 42, 300, 6};
+    float ratio = value;
+    Rectangle knob = {track.x + ratio * track.width - 9, track.y - 8, 18, 22};
+    Rectangle zone = {track.x - 10, track.y - 14, track.width + 20, 34};
+
+    DrawText(label, static_cast<int>(x), static_cast<int>(y), 22, RAYWHITE);
+    DrawText(TextFormat("%d", static_cast<int>(value * 100)),
+        static_cast<int>(x) + 230, static_cast<int>(y), 22, RAYWHITE);
+    DrawRectangleRounded(track, 1.0f, 4, Color{70, 74, 86, 255});
+    DrawRectangleRounded(knob, 0.4f, 6, Color{46, 204, 113, 255});
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)
+        && CheckCollisionPointRec(m, zone) && !_justOpened)
+        dragging = true;
+    if (dragging && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        float rel = (m.x - track.x) / track.width;
+        if (rel < 0) rel = 0;
+        if (rel > 1) rel = 1;
+        value = rel;
+    }
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON))
+        dragging = false;
+}
+
+void Settings::drawSoundSliders(AudioManager &audio)
+{
+    float x = _panel.x + 40;
+    float y = _panel.y + 110 + 420;
+    float musicVol = audio.getMusicVolume();
+    float sfxVol = audio.getVolume();
+
+    drawVolumeSlider(x, y, "Music", musicVol, _draggingMusicSlider);
+    drawVolumeSlider(x + 360, y, "Effects", sfxVol, _draggingSfxSlider);
+    audio.setMusicVolume(musicVol);
+    audio.setVolume(sfxVol);
 }
