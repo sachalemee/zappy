@@ -270,6 +270,35 @@ void renderer::drawElapsedTime(const game_state &state)
     DrawText(text, GetScreenWidth() - width - 20, 20, 24, RAYWHITE);
 }
 
+void renderer::drawLoseScreen(const game_state &state) const
+{
+    (void)state;
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+        Color{0, 0, 0, 180});
+    const char *text = "GAME OVER";
+    int fontSize = 80;
+    int width = MeasureText(text, fontSize);
+    DrawText(text, (GetScreenWidth() - width) / 2,
+        GetScreenHeight() / 2 - fontSize / 2, fontSize, RED);
+}
+
+void renderer::drawWinScreen(const game_state &state) const
+{
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
+        Color{0, 0, 0, 180});
+    const char *title = "VICTORY";
+    int titleSize = 90;
+    int titleWidth = MeasureText(title, titleSize);
+    DrawText(title, (GetScreenWidth() - titleWidth) / 2,
+        GetScreenHeight() / 2 - titleSize, titleSize, GOLD);
+
+    const char *team = TextFormat("Team: %s", state.winningTeam().c_str());
+    int teamSize = 40;
+    int teamWidth = MeasureText(team, teamSize);
+    DrawText(team, (GetScreenWidth() - teamWidth) / 2,
+        GetScreenHeight() / 2 + 20, teamSize, RAYWHITE);
+}
+
 void renderer::draw(const game_state &state, const Camera3D &cam,
     const ParticleSystem &particles)
 {
@@ -295,4 +324,8 @@ void renderer::draw(const game_state &state, const Camera3D &cam,
     if (_showLevels)
         drawPlayerLevels(state, cam);
     drawElapsedTime(state);
+    if (state.gameWon())
+        drawWinScreen(state);
+    else if (state.allDead())
+        drawLoseScreen(state);
 }

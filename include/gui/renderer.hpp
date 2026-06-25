@@ -33,6 +33,8 @@ private:
     void drawSky(float light) const;
     void drawGround(const game_state &state, float light, const Camera3D &cam) const;
     void drawCelestials(const game_state &state, float phase) const;
+    void drawLoseScreen(const game_state &state) const;
+    void drawWinScreen(const game_state &state) const;
     float _islandScale = 1.0f;
     bool _showLevels = true;
     double _gameElapsed = 0.0;

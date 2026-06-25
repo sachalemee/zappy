@@ -33,6 +33,10 @@ void game_state::reset()
     _width = 0;
     _height = 0;
     _timeUnit = 100;
+    _allDead = false;
+    _gameWon = false;
+    _hasHadPlayers = false;
+    _winningTeam.clear();
     _tiles.clear();
     _teams.clear();
     _players.clear();
@@ -87,6 +91,7 @@ void game_state::parseNewPlayer(std::istringstream &args)
         >> player.level >> player.team;
     player.id = extractId(token);
     _players.push_back(player);
+    _hasHadPlayers = true;
 }
 
 void game_state::parsePlayerPosition(std::istringstream &args)
@@ -131,6 +136,12 @@ void game_state::parsePlayerInventory(std::istringstream &args)
         args >> player->inventory[i];
 }
 
+void game_state::parseGameEnd(std::istringstream &args)
+{
+    args >> _winningTeam;
+    _gameWon = true;
+}
+
 void game_state::parsePlayerDeath(std::istringstream &args)
 {
     std::string token;
@@ -139,6 +150,8 @@ void game_state::parsePlayerDeath(std::istringstream &args)
     args >> token;
     id = extractId(token);
     std::erase_if(_players, [id](const Player &p) { return p.id == id; });
+    if (_players.empty() && _hasHadPlayers)
+        _allDead = true;
 }
 
 void game_state::parseNewEgg(std::istringstream &args)
@@ -179,6 +192,7 @@ bool game_state::handleLine(const std::string &line)
         {"enw", &game_state::parseNewEgg},
         {"ebo", &game_state::parseEggRemoval},
         {"edi", &game_state::parseEggRemoval},
+        {"seg", &game_state::parseGameEnd},
     };
     std::istringstream stream(line);
     std::string command;
