@@ -13,6 +13,7 @@ int error_handling(int ac, char **av, server_t *s)
         write(2, "[ERROR] Not enough arguments\n", 30);
         return helper();
     }
+    s->freq = 100;
     if (parse_args(ac, av, s) == IS_EXIT_FAILURE) {
         write(2, "[ERROR] Failed to parse arguments\n", 34);
         return helper();
