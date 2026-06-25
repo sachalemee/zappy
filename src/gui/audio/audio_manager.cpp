@@ -31,6 +31,8 @@ AudioManager::~AudioManager()
 {
     for (auto &pair : _sounds)
         UnloadSound(pair.second);
+    if (_musicLoaded)
+        UnloadMusicStream(_music);
     CloseAudioDevice();
 }
 
@@ -83,4 +85,36 @@ bool AudioManager::isMuted() const
 void AudioManager::toggleMute()
 {
     setMuted(!_muted);
+}
+
+void AudioManager::loadMusic(const std::string &path)
+{
+    _music = LoadMusicStream(path.c_str());
+    _music.looping = true;
+    _musicLoaded = true;
+}
+
+void AudioManager::updateMusic()
+{
+    if (_musicLoaded)
+        UpdateMusicStream(_music);
+}
+
+void AudioManager::playMusic()
+{
+    if (_musicLoaded)
+        PlayMusicStream(_music);
+}
+
+
+void AudioManager::stopMusic()
+{
+    if (_musicLoaded)
+        StopMusicStream(_music);
+}
+
+void AudioManager::setMusicVolume(float volume)
+{
+    if (_musicLoaded)
+        SetMusicVolume(_music, volume);
 }

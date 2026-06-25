@@ -10,6 +10,9 @@
 application::application()
     : _window(1920, 1080, "ZAPPY")
 {
+    _audio.loadMusic("src/gui/audio/sounds/ambient.ogg");
+    _audio.setMusicVolume(0.4f);
+    _audio.playMusic();
 }
  
 void application::connectFromMenu()
@@ -51,6 +54,7 @@ void application::run()
 {
     while (!_window.shouldClose()) {
         _window.beginFrame();
+        _audio.updateMusic();
         if (_inGame)
             updateGame();
         else
