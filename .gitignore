@@ -1,4 +1,5 @@
 *.o
+*.odt
 compile_flags.txt
 zappy_ai
 zappy_gui
