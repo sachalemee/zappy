@@ -187,7 +187,7 @@ Une fois ces polls passés, elle appelle `self.fsm.transition(game_state)` et tr
 
 <br>
 
-- **`BROADCAST`** : on encode un appel de recrutement (`Coordinator.encode_incant_call`), on attend `BROADCAST_GIVEUP_LIMIT` tentatives sans réponse avant d'abandonner ce spot et de récupérer ses propres pierres.
+- **`BROADCAST`** : on encode un appel de recrutement (`Coordinator.encode_incant_call`), on attend `BROADCAST_GIVEUP_LIMIT` tentatives sans réponse avant d'abandonner ce spot et de récupérer ses propres pierres
 
 <br>
 
@@ -254,8 +254,8 @@ Le sujet ne fournit que l'infrastructure de `Broadcast` (texte libre + direction
 <br>
 
 ```python
-def encode_incant_call(team_name: str, level: int) -> str:
-    return f"{INCANT_TAG};{team_name};{INCANT_TYPE};{level}"
+def encode_incant_call(team_name: str, level: int, caller_id: int, x: int, y: int) -> str:
+    return f"{INCANT_TAG};{team_name};{INCANT_TYPE};{level};{caller_id};{x};{y}"
 
 def encode_resource_report(team_name: str, resource: str, x: int, y: int) -> str:
     return f"{INCANT_TAG};{team_name};{RESOURCE_TYPE};{resource};{x};{y}"
@@ -263,57 +263,68 @@ def encode_resource_report(team_name: str, resource: str, x: int, y: int) -> str
 
 <br>
 
-- **Appel d'incantation** : Une IA prête à lancer une élévation annonce son niveau, tout coéquipier du même niveau qui entend l'appel bascule en `GATHER` et marche vers le son au lieu de recruter en double (c'est kro kro kro mignon 😭)
+- **Appel d'incantation** : une IA prête à lancer une élévation annonce son niveau, son `caller_id` (son propre PID) et sa position absolue. Tout coéquipier du même niveau qui entend l'appel bascule en `GATHER` et marche *directement vers ces coordonnées* au lieu de recruter en double (c'est kro kro kro mignon 😭)
 
 <br>
 
-- **Rapport de ressource** : Une IA qui croise une pierre dont il n'a pas encore besoin la signale aux autres avec sa position absolue (`x;y`), pour qu'un coéquipier qui en a besoin y aille directement plutôt que de la redécouvrir par hasard (malynx le lynx 😉)
+- **Rapport de ressource** : une IA qui croise une pierre dont elle n'a pas encore besoin la signale aux autres avec sa position absolue (`x;y`), pour qu'un coéquipier qui en a besoin y aille directement plutôt que de la redécouvrir par hasard (malynx le lynx 😉)
 
 <br>
 
-Important : la direction `K` que renvoie le serveur est relative à celui qui *écoute*, pas à celui qui parle : on ne peut donc transmettre que des coordonnées absolues dans le texte, jamais une direction
+Important : la direction `K` que renvoie le serveur est relative à celui qui *écoute*, pas à celui qui parle, et change à chaque pas qu'on fait. C'est justement pour ça qu'on ne s'en sert plus pour naviguer : on transmet une position absolue dans le texte, et chacun calcule son propre chemin vers ce point fixe avec `Navigator.move_toward_position` (la même fonction qui sert à l'exploration)
 
 <br>
 
 ### Exemple concret : deux IA qui se parlent
 
-Prenons deux IA de la même équipe `team1`, niveau 2, sur deux coins opposés de la carte. L'IA A vient de poser ses pierres et est prêt à lancer son incantation, mais il lui manque un deuxième joueur niveau 2 sur sa tuile (le sujet l'exige). Il bascule en `BROADCAST` :
+Prenons deux IA de la même équipe `team1`, niveau 2, sur deux coins opposés de la carte. L'IA A vient de poser ses pierres et est prête à lancer son incantation, mais il lui manque un deuxième joueur niveau 2 sur sa tuile (le sujet l'exige). Elle bascule en `BROADCAST` :
 
 <br>
 
 ```python
-self.next_argument = Coordinator.encode_incant_call("team1", 2)
+self.next_argument = Coordinator.encode_incant_call(
+    "team1", 2, self._caller_id, *self.state.position)
 return Action.BROADCAST
 ```
 
-Ce qui part littéralement sur le socket, au format imposé par le sujet (`Broadcast <text>\n`) :
+`self._caller_id` est juste le PID de notre propre process (`os.getpid()`), pris au lancement : pas besoin que le serveur nous attribue un identifiant, on en a déjà un, et il est forcément unique parmi nos coéquipiers
+
+<br>
+
+Ce qui part littéralement sur le socket, au format imposé par le sujet (`Broadcast <text>\n`), si A est en `(4, 7)` :
 
 ```
-Broadcast ZAPPY;team1;INCANT;2
+Broadcast ZAPPY;team1;INCANT;2;4821;4;7
 ```
 
 <br>
 
-Le serveur calcule `K` *pour chaque auditeur séparément* (sa direction dépend de la position et de l'orientation de qui écoute), donc L'IA B ne reçoit pas le même texte, il reçoit sa propre ligne, par exemple :
+Le serveur calcule `K` *pour chaque auditeur séparément* (sa direction dépend de la position et de l'orientation de qui écoute), mais on ne s'en sert que pour savoir qu'un message est arrivé, pas pour s'orienter. L'IA B reçoit sa propre ligne :
 
 ```
-message 3, ZAPPY;team1;INCANT;2
+message 3, ZAPPY;team1;INCANT;2;4821;4;7
 ```
 
 <br>
 
-Côté IA B, `handle_broadcast` décode le texte, vérifie que c'est bien un appel d'incantation pour *son* équipe et *son* niveau, et range `K` pour que `decide()` s'en serve la prochaine fois :
+Côté IA B, `handle_broadcast` décode le texte, vérifie que c'est bien un appel d'incantation pour *son* équipe et *son* niveau, et retient la position et l'identifiant de A :
 
 ```python
-k, text = Coordinator.parse_broadcast_line(line)        # k=3, text="ZAPPY;team1;INCANT;2"
-level = Coordinator.parse_incant_call("team1", text)     # level=2
+k, text = Coordinator.parse_broadcast_line(line)                      # k=3, text="ZAPPY;team1;INCANT;2;4821;4;7"
+level, caller_id, x, y = Coordinator.parse_incant_call("team1", text)  # level=2, caller_id=4821, x=4, y=7
 if level == self.state.level:
-    self.state.incoming_call = (level, k)                 # la FSM passera en GATHER au prochain tick
+    self.state.incoming_call = (level, k)
+    self._following_caller_id = caller_id   # B se verrouille sur A
+    self._caller_position = (x, y)           # ... et sait exactement où aller c'est fort c'est fort
 ```
 
 <br>
 
-L'IA B tourne alors vers `K=3` (`Navigator.move_toward_sound`), avance tick après tick, et reçoit un nouveau `message K, ...` à chaque fois que A rebroadcast (`BROADCAST_COOLDOWN`) avec un `K` mis à jour puisque B se rapproche. Quand B arrive enfin sur la tuile de A, le serveur lui envoie `K=0`, et `decide()` quitte `GATHER` pour aller lancer l'incantation aux côtés de A.
+L'IA B navigue ensuite vers `(4, 7)` tick après tick (`Navigator.move_toward_position`), sans dépendre d'un nouveau `message K, ...` pour corriger sa direction : la position est fixe, donc même si A arrête de rebroadcaster, B continue d'avancer droit vers elle. Quand B arrive enfin sur la tuile de A (`self._caller_position == self.state.position`), `decide()` libère le verrou et quitte `GATHER` pour aller lancer l'incantation aux côtés de A
+
+<br>
+
+**Pourquoi verrouiller sur un `caller_id` ?** Sans lui, B suivrait la position du *dernier* appel entendu, et si A *et* un troisième bot C appellent en même temps pour le même niveau, B zigzaguerait entre les deux destinations sans jamais arriver nulle part. Avec le verrou, B ignore C tant qu'il suit déjà A (`handle_broadcast`, condition `already_following_someone_else`), et le verrou ne se libère que quand on quitte vraiment `GATHER` : soit on est arrivé, soit la FSM nous a fait passer ailleurs (`INCANTATE` directement, par exemple, si on était déjà sur place quand l'appel est arrivé — voir le test `test_releases_lock_when_incantate_preempts_gather`). Comme la cible est une position fixe et non plus un cap relatif qui dérive à chaque pas, il n'y a plus besoin de timeout : on finit toujours par y arriver, ou par changer d'état pour une bonne raison
 
 <br>
 
@@ -325,7 +336,7 @@ Broadcast ZAPPY;team1;RESOURCE;thystame;14;3
 
 <br>
 
-N'importe quel coéquipier qui a encore besoin de `thystame` et qui entend ce message ira directement en `(14, 3)` (`Navigator.move_toward_position`) au lieu de tomber sur cette pierre par hasard en explorant. Une IA qui n'en a pas besoin l'ignore (`_next_known_target` ne renvoie que des ressources qui manquent encore).
+N'importe quel coéquipier qui a encore besoin de `thystame` et qui entend ce message ira directement en `(14, 3)` (`Navigator.move_toward_position`) au lieu de tomber sur cette pierre par hasard en explorant. Une IA qui n'en a pas besoin l'ignore (`_next_known_target` ne renvoie que des ressources qui manquent encore)
 
 <br>
 
@@ -347,7 +358,7 @@ def has_fork_surplus(self, game_state) -> bool:
 
 <br>
 
-Le nombre de slots disponibles est une information **du serveur**, pas un calcul qu'on peut deviner localement (et je ne vais pas l'inventer lol) : un autre process IA de la même équipe peut aussi forker, et un oeuf initial peut déjà être présent au lancement du serveur.
+Le nombre de slots disponibles est une information **du serveur**, pas un calcul qu'on peut deviner localement (et je ne vais pas l'inventer lol) : un autre process IA de la même équipe peut aussi forker, et un oeuf initial peut déjà être présent au lancement du serveur
 
 C'est pour ça que `known_free_slots` (`game/state.py`) n'est jamais incrémenté à la main après un `Fork` : il est resynchronisé périodiquement avec la commande `Connect_nbr` (`brain.py`)
 
@@ -360,7 +371,7 @@ elif action == Action.CONNECT_NBR:
 
 <br>
 
-Dès que `known_free_slots > 0`, `main.py` lance un process IA enfant (`subprocess.Popen`) qui se connecte sur le même port/équipe ; le serveur lui assigne automatiquement un oeuf déjà pondu.
+Dès que `known_free_slots > 0`, `main.py` lance un process IA enfant (`subprocess.Popen`) qui se connecte sur le même port/équipe ; le serveur lui assigne automatiquement un oeuf déjà pondu
 
 <br>
 
@@ -370,7 +381,7 @@ Dès que `known_free_slots > 0`, `main.py` lance un process IA enfant (`subproce
 
 ## 9. Parler au serveur : `Protocol` et `Connection`
 
-`Connection` (`src/ai/network/connection.py`) ne connaît que des octets et des lignes : elle bufferise jusqu'à trouver un `\n`, jamais d'attente active (le timeout du socket est géré une couche plus haut).
+`Connection` (`src/ai/network/connection.py`) ne connaît que des octets et des lignes : elle bufferise jusqu'à trouver un `\n`, jamais d'attente active (le timeout du socket est géré une couche plus haut)
 
 `Protocol` (`src/ai/network/protocol.py`) connaît la grammaire du sujet :
 
@@ -379,7 +390,7 @@ Si l'équipe est pleine ou inconnue, le serveur répond `ko` à la place du `CLI
 
 <br>
 
-- **`poll_responses()`** sépare les lignes "pushées" par le serveur sans qu'on les ait demandées (`dead`, `eject: K`, `message K, texte`, `Elevation underway`) des réponses normales, qu'elle apparie dans l'ordre avec la file `pending` des commandes envoyées (FIFO : le serveur répond dans l'ordre où il a reçu).
+- **`poll_responses()`** sépare les lignes "pushées" par le serveur sans qu'on les ait demandées (`dead`, `eject: K`, `message K, texte`, `Elevation underway`) des réponses normales, qu'elle apparie dans l'ordre avec la file `pending` des commandes envoyées (FIFO : le serveur répond dans l'ordre où il a reçu)
 
 ## 10. Vérifier les conditions d'une incantation
 
@@ -397,7 +408,7 @@ def ready_to_incantate(self, game_state) -> bool:
 
 <br>
 
-Le sujet précise aussi que la vérification se refait *au début et à la fin* de l'incantation : c'est une responsabilité du serveur (qui peut faire échouer l'incantation si quelqu'un a bougé une pierre pendant les 300/f ticks de gel), notre IA n'a pas à la dupliquer.
+Le sujet précise aussi que la vérification se refait *au début et à la fin* de l'incantation : c'est une responsabilité du serveur (qui peut faire échouer l'incantation si quelqu'un a bougé une pierre pendant les 300/f ticks de gel), notre IA n'a pas à la dupliquer
 
 <br>
 
