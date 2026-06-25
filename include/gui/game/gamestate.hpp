@@ -45,6 +45,9 @@ public:
     const std::vector<Player> &players() const { return _players; }
     const std::vector<Egg> &eggs() const { return _eggs; }
     const std::vector<std::string> &teams() const { return _teams; }
+    bool allDead() const { return _allDead; }
+    bool gameWon() const { return _gameWon; }
+    const std::string &winningTeam() const { return _winningTeam; }
 
 private:
     void parseMapSize(std::istringstream &args);
@@ -60,7 +63,12 @@ private:
     void parseEggRemoval(std::istringstream &args);
     Player *findPlayer(int id);
     static int extractId(const std::string &token);
+    void parseGameEnd(std::istringstream &args);
 
+    bool _hasHadPlayers = false;
+    bool _gameWon = false;
+    std::string _winningTeam;
+    bool _allDead = false;
     int _width = 0;
     int _height = 0;
     int _timeUnit = 100;
