@@ -40,10 +40,17 @@ public:
     void setMuted(bool m);
     bool isMuted() const;
     void toggleMute();
+    void loadMusic(const std::string &path);
+    void playMusic();
+    void stopMusic();
+    void updateMusic();
+    void setMusicVolume(float v);
 
 private:
     void load(SoundId id, const std::string &path);
-
+    
+    bool _musicLoaded = false;
+    Music _music;
     std::unordered_map<SoundId, Sound> _sounds;
     float _volume;
     bool _muted;
