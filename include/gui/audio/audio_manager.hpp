@@ -45,10 +45,12 @@ public:
     void stopMusic();
     void updateMusic();
     void setMusicVolume(float v);
+    float getMusicVolume() const;
 
 private:
     void load(SoundId id, const std::string &path);
     
+    float _musicVolume = 1.0f;
     bool _musicLoaded = false;
     Music _music;
     std::unordered_map<SoundId, Sound> _sounds;
