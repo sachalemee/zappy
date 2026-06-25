@@ -224,8 +224,11 @@ void renderer::drawPlayers(const game_state &state) const
     for (const Player &player : state.players()) {
         Vector3 pos = {static_cast<float>(player.x), 0.3f,
             static_cast<float>(player.y)};
+        float angle = static_cast<float>(1 - player.orientation) * 90.0f + 180.0f;
+
         if (_villagerModel.meshCount > 0)
-            DrawModel(_villagerModel, pos, 0.05f, WHITE);
+            DrawModelEx(_villagerModel, pos, {0.0f, 1.0f, 0.0f}, angle,
+                {0.05f, 0.05f, 0.05f}, WHITE);
         else
             DrawCube({pos.x, 0.4f, pos.z}, 0.4f, 0.6f, 0.4f, RED);
     }
