@@ -10,7 +10,7 @@
 
 int listen_socket(server_t *s)
 {
-    if (listen(s->server_fd, 10) < 0)
+    if (listen(s->server_fd, 100) < 0)
         return IS_EXIT_FAILURE;
     return IS_EXIT_SUCCESS;
 }
