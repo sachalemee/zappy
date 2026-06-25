@@ -30,7 +30,7 @@ void application::connectFromMenu()
 
 void application::updateMenu()
 {
-    _menu.draw();
+    _menu.draw(_audio);
     if (_menu.isConnectPressed())
         connectFromMenu();
 }
@@ -46,7 +46,7 @@ void application::updateGame()
     _renderer.draw(_state, _camera.get(), _particles);
     _zoomButtons.draw(_camera);
     _settingsButton.draw(_settings);
-    _settings.draw(_state, _connection);
+    _settings.draw(_state, _connection, _audio);
     _teamList.draw(_state);
 }
  
