@@ -11,6 +11,8 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/select.h>
+#include <errno.h>
 
 network_client::~network_client()
 {
@@ -20,16 +22,31 @@ network_client::~network_client()
 bool network_client::openSocket(const addrinfo &info)
 {
     int flags = 0;
+    fd_set writeFds;
+    struct timeval timeout = {2, 0};
+    int err = 0;
+    socklen_t len = sizeof(err);
 
     _fd = socket(info.ai_family, info.ai_socktype, info.ai_protocol);
     if (_fd < 0)
         return false;
-    if (connect(_fd, info.ai_addr, info.ai_addrlen) < 0) {
+    flags = fcntl(_fd, F_GETFL, 0);
+    fcntl(_fd, F_SETFL, flags | O_NONBLOCK);
+    if (connect(_fd, info.ai_addr, info.ai_addrlen) < 0
+        && errno != EINPROGRESS) {
         disconnect();
         return false;
     }
-    flags = fcntl(_fd, F_GETFL, 0);
-    fcntl(_fd, F_SETFL, flags | O_NONBLOCK);
+    FD_ZERO(&writeFds);
+    FD_SET(_fd, &writeFds);
+    if (select(_fd + 1, nullptr, &writeFds, nullptr, &timeout) <= 0) {
+        disconnect();
+        return false;
+    }
+    if (getsockopt(_fd, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
+        disconnect();
+        return false;
+    }
     return true;
 }
 
