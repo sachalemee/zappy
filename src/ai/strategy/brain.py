@@ -34,6 +34,7 @@ class Brain:
         self.next_argument: str | None = None # argument for the next command (Take/Set/Broadcast)
         self._caller_id = os.getpid() # identifies us as a caller in our own incant calls
         self._following_caller_id: int | None = None # caller we're currently walking toward, if any
+        self._caller_position: tuple[int, int] | None = None # that caller's last known absolute position
         self._incantation_pending = False
         self._depositing = False # once the bag has everything needed, stay in deposit mode until the ground does too (avoids take/set flip-flopping on the same stone)
         self._last_gather_k = None # last broadcast direction we already turned for, so a stale k advances instead of re-turning
@@ -71,6 +72,12 @@ class Brain:
             self._broadcast_attempts = 0 # left the state (joined someone, leveled up...) ; start fresh next time
             self._last_players_here = 1
 
+        if self.fsm.state != State.GATHER:
+            self.state.incoming_call = None
+            self._last_gather_k = None
+            self._following_caller_id = None
+            self._caller_position = None
+
         tile = self.state.current_tile()
         # eject works like this : pushes everyone else off the tile (and destroys their eggs there); only outside of GATHER/INCANTATE/BROADCAST so we never eject players we actually want to elevate with
         if self.fsm.state in (State.COLLECT, State.SURVIVE) and tile and tile.players_here > 1:
@@ -106,21 +113,17 @@ class Brain:
             else:
                 self._broadcast_cooldown = BROADCAST_COOLDOWN
                 self._broadcast_attempts += 1
-                self.next_argument = Coordinator.encode_incant_call(self.state.team_name, self.state.level, self._caller_id)
+                self.next_argument = Coordinator.encode_incant_call(
+                    self.state.team_name, self.state.level, self._caller_id, *self.state.position)
                 return Action.BROADCAST
         if self.fsm.state == State.GATHER:
-            _, k = self.state.incoming_call
-            if k == 0:
+            if self._caller_position == self.state.position:
                 self.state.incoming_call = None
                 self._last_gather_k = None
                 self._following_caller_id = None
-            elif k == self._last_gather_k:
-                # no fresh broadcast since we turned for this k ; advance instead of
-                # re-issuing the same turn every tick (that would just spin in place)
-                return Action.FORWARD
+                self._caller_position = None
             else:
-                self._last_gather_k = k
-                return Navigator.move_toward_sound(k)
+                return Navigator.move_toward_position(self.state, self._caller_position)
 
         if self.fsm.state == State.SURVIVE:
             if tile and tile.resources.get("food", 0) > 0:
@@ -203,13 +206,14 @@ class Brain:
         k, text = parsed
         call = Coordinator.parse_incant_call(self.state.team_name, text)
         if call is not None:
-            level, caller_id = call
+            level, caller_id, x, y = call
             already_following_someone_else = (
                 self._following_caller_id is not None and self._following_caller_id != caller_id
             )
             if level == self.state.level and not already_following_someone_else:
                 self.state.incoming_call = (level, k)
                 self._following_caller_id = caller_id
+                self._caller_position = (x, y)
             return True
 
         report = Coordinator.parse_resource_report(self.state.team_name, text)

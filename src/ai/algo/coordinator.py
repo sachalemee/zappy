@@ -13,20 +13,18 @@ RESOURCE_TYPE = "RESOURCE"
 
 class Coordinator:
     @staticmethod
-    def encode_incant_call(team_name: str, level: int, caller_id: int) -> str:
-        # caller_id works like this : lets a listener stick to the same caller instead of
-        # zigzagging between several simultaneous callers of the same level
-        return f"{INCANT_TAG};{team_name};{INCANT_TYPE};{level};{caller_id}"
+    def encode_incant_call(team_name: str, level: int, caller_id: int, x: int, y: int) -> str:
+        return f"{INCANT_TAG};{team_name};{INCANT_TYPE};{level};{caller_id};{x};{y}"
 
     @staticmethod
-    def parse_incant_call(team_name: str, text: str) -> tuple[int, int] | None:
+    def parse_incant_call(team_name: str, text: str) -> tuple[int, int, int, int] | None:
         parts = text.strip().split(";")
-        if len(parts) != 5 or parts[0] != INCANT_TAG or parts[2] != INCANT_TYPE:
+        if len(parts) != 7 or parts[0] != INCANT_TAG or parts[2] != INCANT_TYPE:
             return None
         if parts[1] != team_name:
             return None
         try:
-            return int(parts[3]), int(parts[4])
+            return int(parts[3]), int(parts[4]), int(parts[5]), int(parts[6])
         except ValueError:
             return None
 
