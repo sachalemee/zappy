@@ -165,7 +165,7 @@ void Menu::handleClicks()
         _connectPressed = true;
 }
 
-void Menu::draw()
+void Menu::draw(AudioManager &audio)
 {
     _connectPressed = false;
     layout();
@@ -177,5 +177,5 @@ void Menu::draw()
     drawConnectButton();
     drawSettingsButton();
     handleClicks();
-    _settings.draw();
+    _settings.draw(audio);
 }

@@ -7,7 +7,6 @@
 
 #ifndef MENU_HPP_
 #define MENU_HPP_
-
 #include <raylib.h>
 #include <string>
 #include "menu_gui/TextBox.hpp"
@@ -17,11 +16,10 @@ class Menu {
 public:
     Menu();
     ~Menu();
-
-    void draw();
     bool isConnectPressed() const;
     const std::string &getHost() const;
     const std::string &getPort() const;
+    void draw(AudioManager &audio);
 
 private:
     void layout();

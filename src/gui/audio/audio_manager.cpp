@@ -115,6 +115,12 @@ void AudioManager::stopMusic()
 
 void AudioManager::setMusicVolume(float volume)
 {
+    _musicVolume = std::clamp(volume, 0.0f, 1.0f);
     if (_musicLoaded)
-        SetMusicVolume(_music, volume);
+        SetMusicVolume(_music, _musicVolume);
+}
+
+float AudioManager::getMusicVolume() const
+{
+    return _musicVolume;
 }
