@@ -1,6 +1,6 @@
 # ZAPPY
 
-![ZAPPY Storefront Image](doc/)
+![ZAPPY Storefront Image](docs/)
 
 ### Development
 
@@ -54,12 +54,12 @@ Binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) are produced at the repositor
 
 ## Repository Architecture
 
-See the complete repository architecture here : [ZAPPY Project structure](doc/PROJECT_STRUCTURE.md)
+See the complete repository architecture here : [ZAPPY Project structure](docs/PROJECT_STRUCTURE.md)
 
 ## Documentation
 
-- [General documentation](doc/DOCUMENTATION.md)
-- [Server](doc/SERVER_DOCUMENTATION.md) · [GUI](doc/GUI_DOCUMENTATION.md) · [AI](doc/AI_DOCUMENTATION.md)
+- [General documentation](docs/DOCUMENTATION.md)
+- [Server](docs/SERVER_DOCUMENTATION.md) · [GUI](docs/GUI_DOCUMENTATION.md) · [AI](docs/AI_DOCUMENTATION.md)
 
 ## License
 
