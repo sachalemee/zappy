@@ -1,4 +1,7 @@
 
+![ZAPPY UML ARCHITECTURE PIC](zappy_uml_archtecture.png)
+
+
 ```zsh
 .
 ├── binaries_provided
