@@ -39,10 +39,10 @@ Au lancement, **aucun argument CLI n'est requis** : `./zappy_gui` ouvre directem
 
 Le rendu utilise une `Camera3D` raylib (FOV par défaut 45°) et des modèles `.glb` chargés depuis `src/gui/models/` :
 
-- `ingot.glb`, `bread.glb`, `bean.glb`, `diamond.glb` — ressources sur les tuiles
-- `villager.glb` — joueurs
-- `egg.glb` — œufs
-- `grass.glb`, `island.glb` — sol / décor
+- `ingot.glb`, `bread.glb`, `bean.glb`, `diamond.glb` - ressources sur les tuiles
+- `villager.glb` - joueurs
+- `egg.glb` - œufs
+- `grass.glb`, `island.glb` - sol / décor
 
 Le `renderer` dessine, à chaque frame :
 - la grille de tuiles et les ressources posées dessus,
