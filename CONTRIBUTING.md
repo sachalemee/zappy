@@ -1,6 +1,6 @@
 # Contributing to ZAPPY
 
-Thanks for taking the time to contribute. This project is developed by a fixed team of six (Marin Jeunot, Evans Ramin, Thibault Miall, Daniel Lozovan, Nicolas Gonzalez and Sacha Lemée) for the Epitech YEP curriculum, but the same rules apply to everyone touching the code : including future us.
+Thanks for taking the time to contribute. This project is developed by a fixed team of six (Marin Jeunot, Evans Ramin, Thibault Miallet, Daniel Lozovan, Nicolas Gonzalez and Sacha Lemée) for the Epitech YEP curriculum, but the same rules apply to everyone touching the code : including future us.
 
 ## Project layout
 
