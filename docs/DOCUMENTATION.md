@@ -12,9 +12,9 @@ Tutoriel complet sur la partie IA.
 ![ZAPPY PICT FOR DOCUMENTATION FILE](images/elementary_prog_sm2.png)
 
 ### [Comment fonctionne le **Serveur** sur notre Zappy ?](SERVER_DOCUMENTATION.md)
-Tutoriel complet sur la partie IA.
+Tutoriel complet sur la partie Serveur.
 
 ### [Comment fonctionne le **Rendu graphique** sur notre Zappy ?](GUI_DOCUMENTATION.md)
-Tutoriel complet sur la partie IA.
+Tutoriel complet sur la partie GUI.
 
 ![ZAPPY PICT FOR DOCUMENTATION FILE]()
