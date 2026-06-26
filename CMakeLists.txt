@@ -60,7 +60,7 @@ file(GLOB_RECURSE GUI_SOURCES src/gui/*.cpp)
 
 add_executable(zappy_gui ${GUI_SOURCES})
 
-target_compile_options(zappy_gui PRIVATE ${PROJECT_WARNING_FLAGS})
+target_compile_options(zappy_gui PRIVATE -Wno-missing-field-initializers)
 
 target_include_directories(zappy_gui PRIVATE
     include
