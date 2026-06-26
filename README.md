@@ -38,8 +38,8 @@ cd G-YEP-400-PAR-4-1-zappy-11
 2. **Build the project:**
 
 ```sh
-cmake -B build -S .
-cmake --build build -j$(nproc)
+cmake -S . -B build
+cmake --build build -j
 ```
 
 Binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) are produced at the repository root.
