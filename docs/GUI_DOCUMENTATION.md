@@ -8,6 +8,8 @@ Au lancement, **aucun argument CLI n'est requis** : `./zappy_gui` ouvre directem
 - Host : `127.0.0.1`
 - Port : `4242`
 
+![](images/host_port.png)
+
 ### Établissement de la connexion (`network/`)
 
 1. `network_client::connectTo(host, port)` (src/gui/network/network_client.cpp) résout l'adresse via `getaddrinfo`, ouvre un socket TCP non bloquant avec un timeout de connexion de 2s, puis bascule le polling en lecture ligne par ligne.
@@ -43,6 +45,7 @@ Le rendu utilise une `Camera3D` raylib (FOV par défaut 45°) et des modèles `.
 - `villager.glb` - joueurs
 - `egg.glb` - œufs
 - `grass.glb`, `island.glb` - sol / décor
+ (**les models sont aussi dans la AI_DOCUMENTATION**)
 
 Le `renderer` dessine, à chaque frame :
 - la grille de tuiles et les ressources posées dessus,
@@ -50,6 +53,8 @@ Le `renderer` dessine, à chaque frame :
 - les œufs,
 - un ciel et un sol dont la teinte varie (jour/nuit) selon une phase de cycle, avec un soleil/une lune en orbite,
 - le temps écoulé, ainsi que les écrans de victoire/défaite en fin de partie.
+
+![](images/lune.png) ![](images/soleil.png)
 
 ## 3. Caméra et contrôles
 
@@ -77,6 +82,7 @@ Panneau modal (760x700) affichant :
 - des curseurs de volume séparés pour la musique et les effets sonores,
 - des boutons +/- pour ajuster la fréquence serveur (envoie la commande `sst` au serveur).
 
+
 ## 5. Audio (`AudioManager`)
 
 Géré via le système audio raylib :
@@ -85,6 +91,8 @@ Géré via le système audio raylib :
 - Volume global mutable, volume musique indépendant, réglables depuis le panneau de réglages.
 
 Le déclenchement des sons est piloté par `connection_manager` en fonction des événements reçus du serveur (ex. `pnw` → Spawn, `pdi` → Death, `pic` → début d'incantation + particules violettes, `pie` → succès d'incantation + particules dorées, `plv` → LevelUp, `pgt`/`pdr` → PickUp/Drop).
+
+![](images/settings.png)
 
 ## 6. Build et lancement
 
