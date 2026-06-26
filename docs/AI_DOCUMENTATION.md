@@ -340,6 +340,11 @@ N'importe quel coéquipier qui a encore besoin de `thystame` et qui entend ce me
 
 <br>
 
+![zappy island](../evidence/Screenshot_From_2026-06-26_13-55-30.png)
+[Runtime Zappy island](../evidence/Screenshot_From_2026-06-26_13-55-30.png)
+
+<br>
+
 ## 8. Se reproduire : `Fork` et le suivi des slots libres, une histoire sous fond de doro party
 
 `Fork` pose un oeuf et libère un slot dans l'équipe (`team->free_slots++` côté serveur). On ne déclenche un `Fork` que quand on a un net surplus (`has_fork_surplus`, `src/ai/algo/fsm.py`) :

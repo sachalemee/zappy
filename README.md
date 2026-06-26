@@ -1,6 +1,6 @@
 # ZAPPY
 
-![ZAPPY Storefront Image](docs/)
+![ZAPPY Storefront Image](evidence/Screenshot_From_2026-06-26_13-54-46.png)
 
 ### Development
 
@@ -51,6 +51,8 @@ Binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) are produced at the repositor
 ./zappy_gui
 ./zappy_ai -p 4242 -n team1 -h localhost
 ```
+
+![ZAPPY Running Image](evidence/Screenshot_From_2026-06-26_13-50-49.png)
 
 ## Repository Architecture
 
