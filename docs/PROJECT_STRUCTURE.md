@@ -3,16 +3,6 @@
 
 ```zsh
 .
-├── binaries_provided
-│   ├── linux
-│   │   ├── zappy_gui.AppImage
-│   │   └── zappy_server
-│   │
-│   ├── macos
-│   │   └── zappy_server
-│   │
-│   └── README.md
-│
 ├── build
 │   ├── CMakeCache.txt
 │   │
