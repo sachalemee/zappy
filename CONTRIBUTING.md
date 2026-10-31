@@ -4,7 +4,7 @@ Thanks for taking the time to contribute. This project is developed by a fixed t
 
 ## Project layout
 
-The repository ships three binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) built from `src/server`, `src/gui` and `src/ai`. See [doc/PROJECT_STRUCTURE.md](doc/PROJECT_STRUCTURE.md) for the full breakdown, and [README.md](README.md) for build instructions.
+The repository ships three binaries (`zappy_server`, `zappy_gui`, `zappy_ai`) built from `src/server`, `src/gui` and `src/ai`. See [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) for the full breakdown, and [README.md](README.md) for build instructions.
 
 ## Branching
 

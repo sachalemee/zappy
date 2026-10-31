@@ -155,7 +155,7 @@ def transition(self, game_state) -> None:
 <br>
 
 ![diamond model](images/diamond.png)
-[Fichier 3D (.glb)](src/gui/models/diamond.glb)
+[Fichier 3D (.glb)](../src/gui/models/diamond.glb)
 
 <br>
 
@@ -200,7 +200,7 @@ Une fois ces polls passés, elle appelle `self.fsm.transition(game_state)` et tr
 <br>
 
 ![bread model](images/bread.png)
-[Fichier 3D (.glb)](src/gui/models/bread.glb)
+[Fichier 3D (.glb)](../src/gui/models/bread.glb)
 
 <br>
 
@@ -243,7 +243,7 @@ Une fois la case cible connue, `move_toward_position` ne fait jamais plus d'une 
 <br>
 
 ![island model](images/island.png)
-[Fichier 3D (.glb)](src/gui/models/island.glb)
+[Fichier 3D (.glb)](../src/gui/models/island.glb)
 
 <br>
 
@@ -420,4 +420,4 @@ Le sujet précise aussi que la vérification se refait *au début et à la fin* 
 Pour finir, notre petite IA se manifeste de cette manière, au travers d'un personnage Minecraft, aliant tradition et modernité !
 
 ![villager model](images/villager.png)
-[Fichier 3D (.glb)](src/gui/models/villager.glb)
+[Fichier 3D (.glb)](../src/gui/models/villager.glb)

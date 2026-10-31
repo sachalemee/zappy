@@ -1,5 +1,4 @@
 
-![ZAPPY UML ARCHITECTURE PIC](zappy_uml_archtecture.png)
 
 
 ```zsh
@@ -129,11 +128,6 @@
 │       ├── timer
 │       │
 │       └── main.c
-│
-├── subject
-│   ├── G-YEP-400_zappy_GUI_protocol.pdf
-│   │
-│   └── G-YEP-400_zappy.pdf
 │
 ├── tests
 │

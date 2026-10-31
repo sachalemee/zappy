@@ -9,7 +9,6 @@ By *Marin Jeunot*(marin.jeunot@epitech.eu), *Evans Ramin*(evans.ramin@epitech.eu
 ## Objective
 
 - "*The goal of this project is to create a network game where several teams confront each other on a tile map containing resources. The winning team is the first one where at least 6 players reach the maximum elevation.*"
-[ZAPPY Subject](subject/G-YEP-400_zappy.pdf)
 
 ## Features
 - `zappy_server`: game server, single-threaded, poll-based socket handling (**C**)
@@ -31,8 +30,8 @@ This project requires:
 1. **Clone the repository:**
 
 ```sh
-git clone git@github.com:EpitechPGE2-2025/G-YEP-400-PAR-4-1-zappy-11.git
-cd G-YEP-400-PAR-4-1-zappy-11
+git clone git@github.com:sachalemee/zappy.git
+cd zappy
 ```
 
 2. **Build the project:**
